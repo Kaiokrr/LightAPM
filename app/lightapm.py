@@ -50,7 +50,8 @@ TILE = os.path.join(ASSETS, "lightapm_tile.png")
 LOGO = os.path.join(ASSETS, "lightapm_logo.png")
 LANCEUR = os.path.join(RACINE, "lightAPM.exe")
 KEY = "#010101"  # couleur rendue transparente (overlay)
-MIN_FENETRE = 5.0  # évite des chiffres délirants juste après le lancement
+MIN_FENETRE = 30.0  # au lancement, on divise par au moins 30 s : pas de pic artificiel les premières secondes
+MIN_MOY_LIVE = 60  # la moyenne d'une session en cours n'est affichée qu'après 1 min de jeu
 MIN_SESSION = 60  # secondes au premier plan en dessous desquelles une session est ignorée
 AFK_APM = 5  # minute sous ce seuil = AFK, ignorée pour le "low"
 APP_ID = "kaio.lightapm"
@@ -498,8 +499,8 @@ class Session:
 
     def resume(self):
         mins = list(self.minutes)
-        if self.min_t >= 30:  # dernière minute incomplète, gardée si assez longue
-            mins.append(self.min_n * 60 / self.min_t)
+        # Peak et low : uniquement des minutes complètes de jeu. Une minute incomplète (ex. 20 s à la fin)
+        # extrapolée à 60 s fausserait le peak ; elle compte quand même dans la moyenne (actions / temps).
         avg = self.actions * 60 / self.duree if self.duree else 0
         actives = [m for m in mins if m >= AFK_APM]
         return {"start": round(self.debut), "end": round(self.vu), "duration": round(self.duree),
@@ -607,6 +608,36 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
 appliquer_theme()
 
+# ---------- Une seule instance ----------
+APPEL = os.path.join(DATA, "afficher.flag")  # un 2e lancement demande à l'instance ouverte de se montrer
+
+
+def instance_unique():
+    """Empêche deux lightAPM en même temps (deux overlays, APM comptés deux fois).
+    Après un redémarrage (--restart), on attend que l'ancienne instance se ferme."""
+    if not WIN:
+        return
+    limite = time.time() + (8 if "--restart" in sys.argv else 0)
+    while True:
+        h = _k32.CreateMutexW(None, False, r"Local\lightAPM_instance")
+        if ctypes.get_last_error() != 183:  # ERROR_ALREADY_EXISTS
+            globals()["_MUTEX"] = h  # gardé ouvert tant que l'app tourne
+            return
+        _k32.CloseHandle(h)
+        if time.time() > limite:
+            try:
+                open(APPEL, "w").close()
+            except OSError:
+                pass
+            sys.exit(0)
+        time.sleep(0.25)
+
+
+if WIN:
+    _k32.CreateMutexW.restype = wt.HANDLE
+    _k32.CreateMutexW.argtypes = [ctypes.c_void_p, wt.BOOL, wt.LPCWSTR]
+instance_unique()
+
 # ---------- Fenêtre principale + overlay ----------
 root = ctk.CTk()
 root.title(NOM)
@@ -703,7 +734,7 @@ def regler_autostart(actif):
 
 def redemarrer():
     """Relance l'app (thème changé, mise à jour installée, assistant relancé)."""
-    subprocess.Popen([pythonw_exe(), os.path.abspath(__file__)], cwd=DOSSIER, close_fds=True)
+    subprocess.Popen([pythonw_exe(), os.path.abspath(__file__), "--restart"], cwd=DOSSIER, close_fds=True)
     quitter()
 
 
@@ -869,8 +900,6 @@ def click_through(actif):
 
 def save():
     try:
-        if ov.winfo_ismapped():
-            cfg["x"], cfg["y"] = ov.winfo_x(), ov.winfo_y()
         with open(CONFIG, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2)
     except Exception:
@@ -911,20 +940,32 @@ def toggle_overlay():
         ov.withdraw()
 
 
-_drag = {"x": 0, "y": 0}
+_drag = {}
 
 
 def start_drag(e):
-    _drag["x"], _drag["y"] = e.x, e.y
+    # point de départ : souris (coordonnées écran) et position mémorisée de l'overlay
+    _drag.update(mx=e.x_root, my=e.y_root, wx=cfg["x"], wy=cfg["y"])
 
 
 def do_drag(e):
-    if not locked:
-        ov.geometry(f"+{ov.winfo_x() + e.x - _drag['x']}+{ov.winfo_y() + e.y - _drag['y']}")
+    if not locked and "mx" in _drag:
+        cfg["x"] = _drag["wx"] + e.x_root - _drag["mx"]
+        cfg["y"] = _drag["wy"] + e.y_root - _drag["my"]
+        ov.geometry(f"+{cfg['x']}+{cfg['y']}")
+
+
+def fin_drag(e):
+    """Overlay lâché : sa position est enregistrée tout de suite (survit à un arrêt brutal du PC)."""
+    if not locked and "mx" in _drag:
+        cfg["placed"] = True
+        _drag.clear()
+        save()
 
 
 canvas.bind("<Button-1>", start_drag)
 canvas.bind("<B1-Motion>", do_drag)
+canvas.bind("<ButtonRelease-1>", fin_drag)
 
 # ---------- Tray (chargé seulement quand on réduit) ----------
 tray = {"icon": None, "dispo": True}
@@ -994,6 +1035,17 @@ def quitter():
 
 
 root.protocol("WM_DELETE_WINDOW", quitter)
+
+
+def extinction_windows():
+    """Windows s'éteint ou ferme la session : on enregistre tout avant d'être coupé."""
+    if cfg["setup_done"] and root.state() == "normal":
+        cfg["win_geom"] = root.geometry()
+    save()
+    sauver_stats()
+
+
+root.protocol("WM_SAVE_YOURSELF", extinction_windows)
 
 # ---------- UI ----------
 loading = False
@@ -1916,11 +1968,11 @@ def maj_live_jeu():
     s = ouv.get(suivi["actuel"])
     if s:
         etat = ("EN COURS", ACC, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
-                f"{round(s.actions * 60 / s.duree) if s.duree else 0} moy")
+                (f"{round(s.actions * 60 / s.duree)} moy" if s.duree >= MIN_MOY_LIVE else "calcul…"))
     elif ouv:
         s = max(ouv.values(), key=lambda x: x.vu)
         etat = ("EN PAUSE", MUTED, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
-                f"{round(s.actions * 60 / s.duree) if s.duree else 0} moy")
+                (f"{round(s.actions * 60 / s.duree)} moy" if s.duree >= MIN_MOY_LIVE else "calcul…"))
     elif not cfg["track_apps"]:
         etat = ("INACTIF", DIM, "Suivi désactivé (Options)", "", "")
     else:
@@ -1973,6 +2025,14 @@ def tick_suivi():
                 fermer_session(s)
         if root.winfo_viewable():
             maj_live_jeu()
+        if os.path.exists(APPEL):  # quelqu'un a relancé lightAPM.exe : on se montre
+            os.remove(APPEL)
+            if tray["icon"]:
+                from_tray()
+            else:
+                root.deiconify()
+                root.lift()
+                root.focus_force()
         if ouv and now - suivi["save"] > 30:
             sauver_stats()
     except Exception:
@@ -2085,12 +2145,6 @@ ctk.CTkLabel(cote, text=f"v{VERSION}", font=police(11, mono=True), text_color=DI
     side="bottom", fill="x", padx=12, pady=(0, 4))
 
 
-def reset_pos():
-    cfg["x"], cfg["y"] = place_defaut()
-    ov.geometry(f"+{cfg['x']}+{cfg['y']}")
-    save_later()
-
-
 # --- Apparence ---
 P = pages_opt["apparence"]
 g = Groupe(P, "Thème")
@@ -2180,7 +2234,6 @@ slider(g, "Opacité", opac_v, 0.1, 1.0, 90, lambda v: f"{int(round(v * 100))}%")
 
 g = Groupe(P, "Placement")
 switch(g, "Verrouillé au démarrage", sl_v, "Clics traversants : ne gêne pas en jeu")
-g.ligne("Position", ctk.CTkButton(g.c, text="Remettre en haut à droite", width=CW, command=reset_pos, **BTN))
 
 # --- Calcul ---
 P = pages_opt["calcul"]
@@ -2355,8 +2408,10 @@ def update():
             while events and events[0] < ref - fen:
                 events.popleft()
             n = len(events)
-        duree = max(min(ref - debut, fen), MIN_FENETRE)
+        ecoule = ref - debut
+        duree = max(min(ecoule, fen), min(MIN_FENETRE, fen))
         val = round(n * 60 / duree)
+        calibrage = ecoule < fen  # la fenêtre glissante n'est pas encore pleine
         if overlay_visible:
             txt = str(val) + cfg["suffix"]
             for it in ombres + [texte]:
@@ -2364,16 +2419,27 @@ def update():
             if afk != _afk_ov[0]:  # en pause : chiffre atténué
                 _afk_ov[0] = afk
                 canvas.itemconfig(texte, fill=_mix(cfg["color"], "#6b6b6b", 0.65) if afk else cfg["color"])
-        if fenetre_visible and (val, afk) != _dernier[0]:
-            _dernier[0] = (val, afk)
+        if fenetre_visible and (val, afk, calibrage) != _dernier[0]:
+            _dernier[0] = (val, afk, calibrage)
             live_val.set(str(val))
             maj_apercu()
-            live_lbl.configure(text="EN PAUSE · AFK" if afk else "APM LIVE", text_color=DIM if afk else MUTED)
+            live_lbl.configure(text="EN PAUSE · AFK" if afk else ("CALIBRAGE…" if calibrage else "APM LIVE"),
+                               text_color=DIM if (afk or calibrage) else MUTED)
     root.after(cfg["refresh"], update)
 
 
 restyle()
-if not cfg["placed"] and (cfg["x"], cfg["y"]) == (DEFAUT["x"], DEFAUT["y"]):
+def overlay_visible_a_lecran(x, y):
+    """L'overlay est-il sur un écran branché ? (sinon, ex. 2e écran débranché, il serait introuvable)"""
+    if not WIN:
+        return True
+    u = ctypes.windll.user32
+    vx, vy, vw, vh = (u.GetSystemMetrics(i) for i in (76, 77, 78, 79))  # écran virtuel (tous les écrans)
+    return vx - 20 <= x <= vx + vw - 30 and vy - 10 <= y <= vy + vh - 30
+
+
+# L'overlay reprend sa dernière position ; en haut à droite au premier lancement ou s'il est hors écran
+if (not cfg["placed"] and (cfg["x"], cfg["y"]) == (DEFAUT["x"], DEFAUT["y"]))         or not overlay_visible_a_lecran(cfg["x"], cfg["y"]):
     cfg["x"], cfg["y"] = place_defaut()
 ov.geometry(f"+{cfg['x']}+{cfg['y']}")
 set_lock(cfg["start_locked"] and cfg["placed"])  # 1er lancement : déverrouillé pour le placer
