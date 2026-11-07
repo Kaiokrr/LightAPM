@@ -1,0 +1,9 @@
+{
+  "version": "1.5.0",
+  "url": "https://raw.githubusercontent.com/Kaiokrr/lightAPM/main/app/lightapm.py",
+  "notes": [
+    "Options rangées par catégorie, avec un aperçu de l'overlay en direct",
+    "Un seul lightAPM.exe pour tout installer et lancer",
+    "Tes réglages et tes stats sont maintenant dans le dossier data/"
+  ]
+}

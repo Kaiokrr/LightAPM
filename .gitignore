@@ -1,0 +1,12 @@
+# Données perso (réglages, stats, journal) : restent sur ton PC
+data/
+
+# Python
+__pycache__/
+*.pyc
+*.bak
+*.new
+
+# Compilation du lanceur (PyInstaller)
+build/
+*.spec
