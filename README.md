@@ -12,7 +12,7 @@
 ![Gratuit](https://img.shields.io/badge/prix-gratuit-2a2140?style=flat-square)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-2a2140?style=flat-square)](LICENSE)
 
-### [Télécharger lightAPM](https://github.com/Kaiokrr/lightAPM/archive/refs/heads/main.zip)
+### [Télécharger lightAPM](https://github.com/Kaiokrr/LightAPM/releases/latest/download/lightAPM.zip)
 
 <sub>Décompresse le ZIP, double-clique sur <code>lightAPM.exe</code>. C'est tout.</sub>
 
@@ -43,7 +43,7 @@
 
 ## Installation
 
-1. **[Télécharge le ZIP](https://github.com/Kaiokrr/lightAPM/archive/refs/heads/main.zip)** et décompresse-le où tu veux (par exemple dans `Documents`).
+1. **[Télécharge le ZIP](https://github.com/Kaiokrr/LightAPM/releases/latest/download/lightAPM.zip)** et décompresse-le où tu veux (par exemple dans `Documents`).
 2. Double-clique sur **`lightAPM.exe`**.
 3. Suis l'assistant : thème, ce qui compte comme une action, démarrage. Une minute, montre en main.
 
@@ -55,7 +55,7 @@ puis installe les composants nécessaires. Ça prend environ une minute et n'arr
 > coûte cher pour un projet gratuit). Clique sur **Informations complémentaires**, puis **Exécuter quand même**.
 > Le code du lanceur est lisible dans [`launcher/launcher.py`](launcher/launcher.py).
 
-Avec Git : `git clone https://github.com/Kaiokrr/lightAPM.git`
+Avec Git : `git clone https://github.com/Kaiokrr/LightAPM.git`
 
 ## Comment sont calculées les stats
 
