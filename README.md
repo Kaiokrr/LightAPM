@@ -1,20 +1,22 @@
 <div align="center">
 
-<img src="app/assets/lightapm_tile.png" alt="Logo lightAPM" width="96">
+<img src="app/assets/lightapm_tile.png" alt="lightAPM logo" width="96">
 
 # lightAPM
 
-**Ton APM en direct par-dessus tes jeux, et tes stats par jeu, session après session.**
+**Your live APM on top of your games, and your stats for every game, session after session.**
 
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-a855f7?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.5.0-a855f7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.6.0-a855f7?style=flat-square)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-2a2140?style=flat-square)
-![Gratuit](https://img.shields.io/badge/prix-gratuit-2a2140?style=flat-square)
-[![Licence MIT](https://img.shields.io/badge/licence-MIT-2a2140?style=flat-square)](LICENSE)
+![Free](https://img.shields.io/badge/price-free-2a2140?style=flat-square)
+[![MIT License](https://img.shields.io/badge/license-MIT-2a2140?style=flat-square)](LICENSE)
 
-### [Télécharger lightAPM](https://github.com/Kaiokrr/LightAPM/releases/latest/download/lightAPM.zip)
+### [Download lightAPM](https://github.com/Kaiokrr/LightAPM/releases/latest/download/lightAPM.zip)
 
-<sub>Décompresse le ZIP, double-clique sur <code>lightAPM.exe</code>. C'est tout.</sub>
+<sub>Unzip it, double-click <code>lightAPM.exe</code>. That's it.</sub>
+
+<sub><b>English</b> · <a href="README.fr.md">Français</a></sub>
 
 </div>
 
@@ -22,140 +24,143 @@
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/stats.png" alt="Onglet Stats : moyenne et peak record de chaque jeu"><br><sub><b>Tes jeux</b> · moyenne et peak de chacun</sub></td>
-    <td align="center" width="33%"><img src="docs/detail.png" alt="Détail d'un jeu : moyenne, peak, low, tendance, courbe et sessions"><br><sub><b>Détail d'un jeu</b> · courbe et historique</sub></td>
-    <td align="center" width="33%"><img src="docs/options.png" alt="Options rangées par catégorie avec aperçu de l'overlay"><br><sub><b>Options</b> · aperçu de l'overlay en direct</sub></td>
+    <td align="center" width="33%"><img src="docs/stats.png" alt="Stats tab: average and best peak for each game"><br><sub><b>Your games</b> · average and peak of each</sub></td>
+    <td align="center" width="33%"><img src="docs/detail.png" alt="Game detail: average, peak, low, trend, chart and sessions"><br><sub><b>Game detail</b> · chart and history</sub></td>
+    <td align="center" width="33%"><img src="docs/options.png" alt="Options organized by category with a live overlay preview"><br><sub><b>Options</b> · live overlay preview</sub></td>
   </tr>
 </table>
 
-## Ce que fait lightAPM
+## What lightAPM does
 
 | | |
 | --- | --- |
-| **Overlay discret** | Un simple chiffre, fond transparent, où tu veux sur l'écran. Verrouillé, les clics le traversent : il ne gêne jamais en jeu. |
-| **Stats par jeu** | Le jeu ouvert est détecté tout seul. Chaque session enregistre ta moyenne, ton peak et ton low, et tes stats se cumulent au fil des parties. |
-| **Courbe d'évolution** | Pour chaque jeu : ta moyenne session après session, la plage entre ton low et ton peak, et ta tendance récente. |
-| **Pause AFK** | Tu lâches le clavier ? Les APM se figent. Tu reprends ? Ils repartent exactement où ils en étaient. |
-| **Résumé de fin de partie** | Une petite carte en bas de l'écran avec la moyenne, le peak et le low de la session. |
-| **Installation en un clic** | `lightAPM.exe` installe tout ce qu'il faut au premier lancement, puis te guide pour les réglages. |
-| **Démarrage avec Windows** | En option, dans la zone de notification, sans droits administrateur. |
-| **Mises à jour** | Proposées au démarrage, jamais installées sans ton accord. |
+| **Unobtrusive overlay** | Just a number on a transparent background, anywhere on your screen. Once locked, clicks go right through it, so it never gets in the way in game. |
+| **Per-game stats** | The game you're playing is detected automatically. Every session records your average, peak and low, and your stats add up over time. |
+| **Progress chart** | For each game: your average session after session, the range between your low and your peak, and your recent trend. |
+| **AFK pause** | Step away from the keyboard and your APM freezes. Come back and it picks up exactly where it left off. |
+| **End-of-game summary** | A small card at the bottom of the screen with the session's average, peak and low. |
+| **English or French** | English by default; switch to French in the setup assistant or in **Options › Appearance**. |
+| **One-click install** | `lightAPM.exe` installs everything it needs on first launch, then walks you through the settings. |
+| **Start with Windows** | Optional, in the notification area, no administrator rights needed. |
+| **Updates** | Offered on startup, never installed without your OK. |
 
 ## Installation
 
-1. **[Télécharge le ZIP](https://github.com/Kaiokrr/LightAPM/releases/latest/download/lightAPM.zip)** et décompresse-le où tu veux (par exemple dans `Documents`).
-2. Double-clique sur **`lightAPM.exe`**.
-3. Suis l'assistant : thème, ce qui compte comme une action, démarrage. Une minute, montre en main.
+1. **[Download the ZIP](https://github.com/Kaiokrr/LightAPM/releases/latest/download/lightAPM.zip)** and unzip it wherever you like (for example in `Documents`).
+2. Double-click **`lightAPM.exe`**.
+3. Follow the assistant: language, theme, what counts as an action, startup. It takes about a minute.
 
-Au premier lancement, `lightAPM.exe` vérifie que Python est installé (et propose de l'installer s'il manque),
-puis installe les composants nécessaires. Ça prend environ une minute et n'arrive qu'une fois.
+On first launch, `lightAPM.exe` checks that Python is installed (and offers to install it if it isn't), then
+installs the components it needs. This takes about a minute and only happens once.
 
 > [!NOTE]
-> Windows peut afficher **« Windows a protégé votre ordinateur »** : l'exe n'est pas signé (un certificat
-> coûte cher pour un projet gratuit). Clique sur **Informations complémentaires**, puis **Exécuter quand même**.
-> Le code du lanceur est lisible dans [`launcher/launcher.py`](launcher/launcher.py).
+> Windows may show **"Windows protected your PC"** because the exe isn't signed (a certificate costs a lot for
+> a free project). Click **More info**, then **Run anyway**. The launcher's source code is readable in
+> [`launcher/launcher.py`](launcher/launcher.py).
 
-Avec Git : `git clone https://github.com/Kaiokrr/LightAPM.git`
+With Git: `git clone https://github.com/Kaiokrr/LightAPM.git`
 
-## Comment sont calculées les stats
+## How the stats are calculated
 
-- **APM en direct** : tes actions des 60 dernières secondes (réglable), ramenées à une minute. Pendant la première
-  minute, l'en-tête affiche « Calibrage » et le chiffre monte progressivement, sans faux pic au lancement.
-- **Une action** = une touche pressée, un clic ou un cran de molette (chacun peut être désactivé). Maintenir
-  une touche ne compte qu'une fois.
-- **Moyenne** d'une session : toutes tes actions divisées par ton temps de jeu réel (pauses AFK exclues).
-- **Peak** : ta meilleure minute de jeu complète.
-- **Low** : ta pire minute de jeu active (les minutes AFK ne comptent pas).
-- **Session** : elle commence quand le jeu passe au premier plan sur ton écran principal, et se termine quand
-  tu le fermes ou le quittes plus de 5 minutes (réglable). Les sessions de moins d'une minute sont ignorées.
+- **Live APM**: your actions over the last 60 seconds (adjustable), scaled to one minute. During the first
+  minute, the header shows "Calibrating" and the number ramps up smoothly, with no fake spike at launch.
+- **One action** = a key press, a click or a mouse wheel notch (each can be turned off). Holding a key down
+  only counts once.
+- **Session average**: all your actions divided by your actual playing time (AFK breaks excluded).
+- **Peak**: your best full minute of play.
+- **Low**: your worst active minute of play (AFK minutes don't count).
+- **Session**: starts when the game comes into focus on your main screen, and ends when you close it or stay
+  away from it for more than 5 minutes (adjustable). Sessions shorter than one minute are ignored.
 
-Les navigateurs (Chrome, Edge, Firefox, Opera, Brave…) ne sont jamais comptés.
+Web browsers (Chrome, Edge, Firefox, Opera, Brave…) are never counted.
 
-## 7 thèmes
+## 7 themes
 
-<img src="docs/themes.png" alt="Les 7 thèmes : Violet, Glace, Braise, Néon, Ambre, Sakura, Mono">
+<img src="docs/themes.png" alt="The 7 themes: Violet, Ice, Ember, Neon, Amber, Sakura, Mono">
 
-Au choix dans l'assistant ou dans **Options › Apparence**.
+Pick one in the setup assistant or in **Options › Appearance**.
 
-## Raccourcis
+## Hotkeys
 
-| Touche | Action |
+| Key | Action |
 | :---: | --- |
-| <kbd>F8</kbd> | Verrouiller / déverrouiller l'overlay. Déverrouillé, glisse-le où tu veux : sa position est gardée. |
-| <kbd>F9</kbd> | Afficher / masquer l'overlay |
+| <kbd>F8</kbd> | Lock / unlock the overlay. Unlocked, drag it wherever you want: its position is remembered. |
+| <kbd>F9</kbd> | Show / hide the overlay |
 
-Modifiables dans **Options › Raccourcis**.
+You can change them in **Options › Hotkeys**.
 
-## Questions fréquentes
+## FAQ
 
 <details>
-<summary><b>Est-ce que lightAPM enregistre ce que je tape ?</b></summary>
+<summary><b>Does lightAPM record what I type?</b></summary>
 <br>
-Non. Il compte les actions, il ne garde pas les touches. Tout reste sur ton PC, dans le dossier <code>data/</code>.
-La seule connexion à Internet sert à vérifier s'il existe une nouvelle version (désactivable dans <b>Options › Mises à jour</b>).
+No. It counts actions; it doesn't keep the keys. Everything stays on your PC, in the <code>data/</code> folder.
+The only Internet connection is used to check whether a new version exists (you can turn it off in <b>Options › Updates</b>).
 </details>
 
 <details>
-<summary><b>Est-ce que ça peut poser problème avec un anti-cheat ?</b></summary>
+<summary><b>Can it cause problems with an anti-cheat?</b></summary>
 <br>
-lightAPM ne touche pas au jeu : il ne lit ni ne modifie sa mémoire et n'injecte rien. Il écoute le clavier et la
-souris au niveau de Windows et regarde quelle fenêtre est au premier plan, comme un logiciel d'overlay classique.
+lightAPM doesn't touch the game: it doesn't read or modify its memory and doesn't inject anything. It listens to
+the keyboard and mouse at the Windows level and checks which window is in focus, like a regular overlay app.
 </details>
 
 <details>
-<summary><b>Où sont mes stats ? Comment repartir de zéro ?</b></summary>
+<summary><b>Where are my stats? How do I start over?</b></summary>
 <br>
-Dans <code>data/stats.json</code> (et tes réglages dans <code>data/config.json</code>), à côté de l'exe.
-Pour effacer un seul jeu : ouvre-le dans l'onglet Stats, puis <b>Supprimer</b>. Pour tout effacer : supprime le dossier <code>data/</code>.
+In <code>data/stats.json</code> (and your settings in <code>data/config.json</code>), next to the exe.
+To delete a single game: open it in the Stats tab, then <b>Delete</b>. To erase everything: delete the <code>data/</code> folder.
 </details>
 
 <details>
-<summary><b>Un jeu est rangé dans « Apps » au lieu de « Jeux »</b></summary>
+<summary><b>A game is listed under "Apps" instead of "Games"</b></summary>
 <br>
-Ouvre-le dans l'onglet Stats et change sa catégorie avec le menu en haut à droite. Tu peux aussi le renommer.
+Open it in the Stats tab and change its category with the menu at the top right. You can rename it too.
 </details>
 
 <details>
-<summary><b>Comment désinstaller ?</b></summary>
+<summary><b>How do I uninstall it?</b></summary>
 <br>
-Si tu as activé <b>Lancer avec Windows</b>, désactive-le d'abord dans <b>Options › Démarrage</b>. Ensuite, supprime simplement le dossier.
+If you turned on <b>Start with Windows</b>, turn it off first in <b>Options › Startup</b>. Then just delete the folder.
 </details>
 
 <details>
-<summary><b>Pour les développeurs</b></summary>
+<summary><b>For developers</b></summary>
 <br>
 
 ```
-lightAPM.exe          lanceur : installe ce qu'il faut et démarre l'app
-app/lightapm.py       l'application (customtkinter, pynput, pystray, Pillow)
-app/assets/           logo et icônes
-launcher/             code source du lanceur + build.bat pour le compiler
-requirements.txt      dépendances Python
-version.json          dernière version publiée, lue par l'app pour proposer les mises à jour
-data/                 réglages et stats de l'utilisateur (créé au lancement, ignoré par Git)
+lightAPM.exe          launcher: installs what's needed and starts the app
+app/lightapm.py       the application (customtkinter, pynput, pystray, Pillow)
+app/assets/           logo and icons
+launcher/             launcher source code + build.bat to compile it
+requirements.txt      Python dependencies
+version.json          latest published version, read by the app to offer updates
+data/                 user settings and stats (created on launch, ignored by Git)
 ```
 
-**Lancer depuis le code**
+**Run from source**
 
 ```
 pip install -r requirements.txt
 pythonw app/lightapm.py
 ```
 
-**Recompiler le lanceur** : `pip install pyinstaller`, puis `launcher\build.bat`.
+**Rebuild the launcher**: `pip install pyinstaller`, then `launcher\build.bat`.
 
-**Publier une mise à jour**
+**Translations**: every visible text is written as `T("English", "Français")` in `app/lightapm.py`.
 
-1. Dans `app/lightapm.py`, augmente `VERSION` et ajoute les nouveautés dans `NOUVEAUTES`.
-2. Reporte le même numéro et les notes dans `version.json`.
-3. Pousse sur `main`.
+**Publish an update**
 
-Au démarrage suivant, les utilisateurs se voient proposer la mise à jour. L'app télécharge le nouveau
-`app/lightapm.py`, vérifie qu'il est valide, garde une copie `.bak`, puis redémarre et affiche « Quoi de neuf ».
+1. In `app/lightapm.py`, bump `VERSION` and add the changes to `NOUVEAUTES` (in English and French).
+2. Put the same number in `version.json`, with the English notes in `notes` and the French ones in `notes_fr`.
+3. Push to `main`.
+
+On their next launch, users are offered the update. The app downloads the new `app/lightapm.py`, checks that
+it's valid, keeps a `.bak` copy, then restarts and shows "What's new".
 </details>
 
 <br>
 
 <div align="center">
-<sub>Fait par <a href="https://github.com/Kaiokrr">Kaiokrr</a> · Code sous <a href="LICENSE">licence MIT</a> : libre de l'utiliser, le modifier et le partager</sub>
+<sub>Made by <a href="https://github.com/Kaiokrr">Kaiokrr</a> · Code under the <a href="LICENSE">MIT license</a>: free to use, modify and share</sub>
 </div>

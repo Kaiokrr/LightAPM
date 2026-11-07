@@ -49,6 +49,25 @@ ICO = os.path.join(ASSETS, "lightapm_icon.ico")
 TILE = os.path.join(ASSETS, "lightapm_tile.png")
 LOGO = os.path.join(ASSETS, "lightapm_logo.png")
 LANCEUR = os.path.join(RACINE, "lightAPM.exe")
+
+
+def _langue_config():
+    """Langue choisie (config.json), anglais par défaut."""
+    try:
+        with open(CONFIG, encoding="utf-8") as f:
+            l = json.load(f).get("language", "en")
+        return l if l in ("en", "fr") else "en"
+    except Exception:
+        return "en"
+
+
+LANGUE = _langue_config()
+
+
+def T(en, fr):
+    """Texte dans la langue de l'app : T("English", "Français")."""
+    return fr if LANGUE == "fr" else en
+
 KEY = "#010101"  # couleur rendue transparente (overlay)
 MIN_FENETRE = 30.0  # au lancement, on divise par au moins 30 s : pas de pic artificiel les premières secondes
 MIN_MOY_LIVE = 60  # la moyenne d'une session en cours n'est affichée qu'après 1 min de jeu
@@ -56,36 +75,52 @@ MIN_SESSION = 60  # secondes au premier plan en dessous desquelles une session e
 AFK_APM = 5  # minute sous ce seuil = AFK, ignorée pour le "low"
 APP_ID = "kaio.lightapm"
 WIN = sys.platform == "win32"
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 # Mises à jour : URL d'un petit fichier JSON {"version": "1.5.0", "url": "<lien du .py>", "notes": [...]}
 # (ex. sur GitHub : https://raw.githubusercontent.com/<toi>/lightAPM/main/version.json).
 # Peut aussi être mise dans apm_counter.json, clé "update_url".
 UPDATE_URL = "https://raw.githubusercontent.com/Kaiokrr/lightAPM/main/version.json"
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-NOUVEAUTES = {
-    "1.5.0": [
-        "Options rangées par catégorie, avec une barre latérale",
-        "Aperçu de l'overlay en direct pendant que tu le règles",
-        "Un seul lightAPM.exe pour tout installer et lancer",
-        "Tes réglages et tes stats sont maintenant dans le dossier data/",
-    ],
-    "1.4.0": [
-        "Écran de configuration au premier démarrage",
-        "7 thèmes de couleur, au choix dans Options > Apparence",
-        "Pause automatique des APM quand tu es AFK, reprise dès que tu rejoues",
-        "Lancement avec Windows (réduit dans le tray si tu veux)",
-        "Vérification des mises à jour et écran « Quoi de neuf »",
-        "La fenêtre garde sa taille et sa position",
-    ],
+NOUVEAUTES = {  # version: {"en": [...], "fr": [...]}
+    "1.6.0": {
+        "en": ["lightAPM is now in English, with French available in Options > Appearance",
+               "Language choice in the setup assistant"],
+        "fr": ["lightAPM est maintenant en anglais, avec le français au choix dans Options > Apparence",
+               "Choix de la langue dans l'assistant de configuration"],
+    },
+    "1.5.0": {
+        "en": ["Options organized by category, with a sidebar",
+               "Live overlay preview while you adjust it",
+               "A single lightAPM.exe installs and launches everything",
+               "Your settings and stats now live in the data/ folder"],
+        "fr": ["Options rangées par catégorie, avec une barre latérale",
+               "Aperçu de l'overlay en direct pendant que tu le règles",
+               "Un seul lightAPM.exe pour tout installer et lancer",
+               "Tes réglages et tes stats sont maintenant dans le dossier data/"],
+    },
+    "1.4.0": {
+        "en": ["Setup assistant on first launch",
+               "7 color themes, in Options > Appearance",
+               "Automatic APM pause when you're AFK, resumes as soon as you play again",
+               "Start with Windows (minimized to tray if you like)",
+               "Update checks and a \"What's new\" screen",
+               "The window keeps its size and position"],
+        "fr": ["Écran de configuration au premier démarrage",
+               "7 thèmes de couleur, au choix dans Options > Apparence",
+               "Pause automatique des APM quand tu es AFK, reprise dès que tu rejoues",
+               "Lancement avec Windows (réduit dans le tray si tu veux)",
+               "Vérification des mises à jour et écran « Quoi de neuf »",
+               "La fenêtre garde sa taille et sa position"],
+    },
 }
 
 # Thèmes : fond noir minimaliste + une couleur d'accent (maquette Claude Design "lightAPM Redesign")
 THEMES = {  # clé: (nom, accent, accent clair, accent foncé)
     "violet": ("Violet", "#a855f7", "#c084fc", "#7e22ce"),
-    "glace": ("Glace", "#22d3ee", "#67e8f9", "#0e7490"),
-    "braise": ("Braise", "#f43f5e", "#fb7185", "#be123c"),
-    "neon": ("Néon", "#22c55e", "#4ade80", "#15803d"),
-    "ambre": ("Ambre", "#f59e0b", "#fbbf24", "#b45309"),
+    "glace": (T("Ice", "Glace"), "#22d3ee", "#67e8f9", "#0e7490"),
+    "braise": (T("Ember", "Braise"), "#f43f5e", "#fb7185", "#be123c"),
+    "neon": (T("Neon", "Néon"), "#22c55e", "#4ade80", "#15803d"),
+    "ambre": (T("Amber", "Ambre"), "#f59e0b", "#fbbf24", "#b45309"),
     "sakura": ("Sakura", "#ec4899", "#f472b6", "#be185d"),
     "mono": ("Mono", "#d4d4d8", "#ffffff", "#71717a"),
 }
@@ -118,7 +153,7 @@ def appliquer_palette(cle):
 
 
 appliquer_palette("violet")
-CATEGORIES = (("jeux", "Jeux"), ("apps", "Apps"))
+CATEGORIES = (("jeux", T("Games", "Jeux")), ("apps", "Apps"))
 NAVIGATEURS = {"chrome.exe", "msedge.exe", "firefox.exe", "opera.exe", "brave.exe", "vivaldi.exe", "arc.exe",
                "zen.exe", "librewolf.exe", "waterfox.exe", "iexplore.exe", "thorium.exe", "floorp.exe"}
 LANCEURS = {"steam.exe", "steamwebhelper.exe", "epicgameslauncher.exe", "riotclientux.exe",
@@ -143,6 +178,7 @@ DEFAUT = {
     "theme": "violet", "setup_done": False, "win_geom": "", "last_version": "",
     "autostart": False, "start_minimized": True, "overlay_on_start": True,
     "check_updates": True, "update_url": "",
+    "language": "en",
 }
 
 
@@ -556,7 +592,7 @@ def fmt_duree(sec):
     m = int(sec // 60)
     if m < 1:
         return "<1 min"
-    return f"{m} min" if m < 60 else f"{m // 60} h {m % 60:02d}"
+    return f"{m} min" if m < 60 else (f"{m // 60}h{m % 60:02d}" if LANGUE == "en" else f"{m // 60} h {m % 60:02d}")
 
 
 def fmt_chrono(sec):
@@ -566,7 +602,7 @@ def fmt_chrono(sec):
 
 
 def fmt_date(ts):
-    return time.strftime("%d/%m %H:%M", time.localtime(ts))
+    return time.strftime(T("%m/%d %H:%M", "%d/%m %H:%M"), time.localtime(ts))
 
 
 # ---------- Thème violet ----------
@@ -748,7 +784,7 @@ def verifier_maj(manuel=False):
 
     def job():
         if not url:
-            actions.append(("maj", None, "Source des mises à jour non configurée.", manuel))
+            actions.append(("maj", None, T("Update source not configured.", "Source des mises à jour non configurée."), manuel))
             return
         try:
             import urllib.request
@@ -758,7 +794,7 @@ def verifier_maj(manuel=False):
             nouvelle = version_tuple(data["version"]) > version_tuple(VERSION)
             actions.append(("maj", data if nouvelle else False, None, manuel))
         except Exception as e:
-            actions.append(("maj", None, f"Vérification impossible ({e.__class__.__name__}).", manuel))
+            actions.append(("maj", None, T(f"Could not check ({e.__class__.__name__}).", f"Vérification impossible ({e.__class__.__name__})."), manuel))
 
     threading.Thread(target=job, daemon=True).start()
 
@@ -773,7 +809,7 @@ def installer_maj(data):
             with urllib.request.urlopen(req, timeout=30) as r:
                 brut = r.read()
             if data.get("sha256") and hashlib.sha256(brut).hexdigest() != data["sha256"].lower():
-                raise ValueError("empreinte sha256 différente")
+                raise ValueError(T("sha256 mismatch", "empreinte sha256 différente"))
             compile(brut.decode("utf-8"), "lightapm.py", "exec")  # refuse un fichier cassé
             moi = os.path.abspath(__file__)
             with open(moi, "rb") as f, open(moi + ".bak", "wb") as b:
@@ -784,7 +820,7 @@ def installer_maj(data):
             actions.append(("maj_ok",))
         except Exception as e:
             log_err(*sys.exc_info())
-            actions.append(("maj_err", f"Échec de la mise à jour ({e})"))
+            actions.append(("maj_err", T(f"Update failed ({e})", f"Échec de la mise à jour ({e})")))
 
     threading.Thread(target=job, daemon=True).start()
 
@@ -925,7 +961,7 @@ def set_lock(etat):
     else:
         canvas.itemconfig(cadre, fill="#1d1330", outline=ACC)
     click_through(etat)
-    lock_txt.set("Déverrouiller l'overlay" if etat else "Verrouiller l'overlay")
+    lock_txt.set(T("Unlock overlay", "Déverrouiller l'overlay") if etat else T("Lock overlay", "Verrouiller l'overlay"))
 
 
 def toggle_overlay():
@@ -989,10 +1025,10 @@ def to_tray():
         return lambda icon, item: actions.append(a)
 
     menu = pystray.Menu(
-        pystray.MenuItem("Ouvrir", push("open"), default=True),
-        pystray.MenuItem("Verrouiller / déverrouiller", push("lock")),
-        pystray.MenuItem("Afficher / masquer l'overlay", push("toggle")),
-        pystray.MenuItem("Quitter", push("quit")),
+        pystray.MenuItem(T("Open", "Ouvrir"), push("open"), default=True),
+        pystray.MenuItem(T("Lock / unlock overlay", "Verrouiller / déverrouiller"), push("lock")),
+        pystray.MenuItem(T("Show / hide overlay", "Afficher / masquer l'overlay"), push("toggle")),
+        pystray.MenuItem(T("Quit", "Quitter"), push("quit")),
     )
     icon = pystray.Icon("lightapm", img, NOM, menu)
     tray["icon"] = icon
@@ -1119,17 +1155,21 @@ etat_maj = {"boite": None, "texte": ""}
 
 
 def quoi_de_neuf(version=VERSION):
-    boite(f"Quoi de neuf · v{version}", "Les nouveautés de cette version",
-          NOUVEAUTES.get(version, ["Corrections et améliorations."]), (("Super !", None, True),))
+    notes = NOUVEAUTES.get(version)
+    if isinstance(notes, dict):
+        notes = notes.get(LANGUE) or notes.get("en")
+    boite(T(f"What's new · v{version}", f"Quoi de neuf · v{version}"),
+          T("What changed in this version", "Les nouveautés de cette version"),
+          notes or [T("Fixes and improvements.", "Corrections et améliorations.")], ((T("Great!", "Super !"), None, True),))
 
 
 def resultat_maj(data, err, manuel):
     if err:
         texte = err
     elif data is False:
-        texte = f"Tu es à jour (v{VERSION})."
+        texte = T(f"You're up to date (v{VERSION}).", f"Tu es à jour (v{VERSION}).")
     else:
-        texte = f"Version {data['version']} disponible."
+        texte = T(f"Version {data['version']} available.", f"Version {data['version']} disponible.")
     etat_maj["texte"] = texte
     try:
         maj_statut.configure(text=texte)
@@ -1137,16 +1177,19 @@ def resultat_maj(data, err, manuel):
         pass
     if data:
         def lancer(w):
-            w.statut.configure(text="Téléchargement et installation…", text_color=ACC_H)
+            w.statut.configure(text=T("Downloading and installing…", "Téléchargement et installation…"),
+                               text_color=ACC_H)
             etat_maj["boite"] = w
             installer_maj(data)
 
-        etat_maj["boite"] = boite(f"Mise à jour {data['version']} disponible",
-                                  f"Tu as la version {VERSION}. L'app redémarre toute seule après l'installation.",
-                                  data.get("notes") or [], (("Plus tard", None, False),
-                                                            ("Mettre à jour", lancer, True)))
+        notes = (data.get("notes_fr") if LANGUE == "fr" else None) or data.get("notes") or []
+        etat_maj["boite"] = boite(T(f"Update {data['version']} available", f"Mise à jour {data['version']} disponible"),
+                                  T(f"You have version {VERSION}. The app restarts by itself after installing.",
+                                    f"Tu as la version {VERSION}. L'app redémarre toute seule après l'installation."),
+                                  notes, ((T("Later", "Plus tard"), None, False),
+                                          (T("Update", "Mettre à jour"), lancer, True)))
     elif manuel and err:
-        boite("Mises à jour", err)
+        boite(T("Updates", "Mises à jour"), err)
 
 
 # ---------- Assistant du premier démarrage ----------
@@ -1167,11 +1210,28 @@ def assistant():
         im = image_defaut()
     logo = ctk.CTkImage(light_image=im, dark_image=im, size=(26, 26))
     ETAPES = (
-        ("Bienvenue sur lightAPM", "Choisis ton thème. Tu pourras le changer à tout moment dans Options."),
-        ("Ce qui compte comme une action", "Choisis les inputs pris en compte dans tes APM."),
-        ("Tes sessions de jeu", "lightAPM détecte le jeu au premier plan et garde tes stats session après session."),
-        ("Démarrage", "Comment lightAPM se lance. Tout reste modifiable dans Options."),
+        (T("Welcome to lightAPM", "Bienvenue sur lightAPM"),
+         T("Pick your language and theme. You can change them anytime in Options.",
+           "Choisis ta langue et ton thème. Tu pourras les changer à tout moment dans Options.")),
+        (T("What counts as an action", "Ce qui compte comme une action"),
+         T("Choose which inputs count toward your APM.", "Choisis les inputs pris en compte dans tes APM.")),
+        (T("Your game sessions", "Tes sessions de jeu"),
+         T("lightAPM detects the game in focus and keeps your stats, session after session.",
+           "lightAPM détecte le jeu au premier plan et garde tes stats session après session.")),
+        (T("Startup", "Démarrage"),
+         T("How lightAPM starts. Everything can be changed later in Options.",
+           "Comment lightAPM se lance. Tout reste modifiable dans Options.")),
     )
+
+    def choisir_langue(nom):
+        l = "fr" if nom == "Français" else "en"
+        if l != LANGUE:  # tous les textes changent : on relance l'assistant dans la nouvelle langue
+            cfg["language"] = l
+            cfg["theme"] = choix["theme"]
+            save()
+            subprocess.Popen([pythonw_exe(), os.path.abspath(__file__), "--restart"], cwd=DOSSIER,
+                             close_fds=True)
+            os._exit(0)
 
     def aller(d):
         etape[0] += d
@@ -1260,45 +1320,68 @@ def assistant():
         corps.pack(fill="both", expand=True)
         corps.columnconfigure((0, 1), weight=1, uniform="c")
         if n == 0:
+            lg = ctk.CTkFrame(corps, fg_color=PANEL, border_width=1, border_color=BORDER, corner_radius=12)
+            lg.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 12))
+            lg.columnconfigure(0, weight=1)
+            ctk.CTkLabel(lg, text=T("Language", "Langue"), font=police(14, True), anchor="w", height=20).grid(
+                row=0, column=0, sticky="w", padx=16, pady=14)
+            seg = ctk.CTkSegmentedButton(lg, values=["English", "Français"], font=police(12, True), height=30,
+                                         text_color=TXT2, selected_color=ACC, selected_hover_color=ACC_H,
+                                         unselected_color=BG, unselected_hover_color=TRACK, fg_color=BG,
+                                         command=choisir_langue)
+            seg.set("Français" if LANGUE == "fr" else "English")
+            seg.grid(row=0, column=1, padx=14)
             for i, k in enumerate(THEMES):
-                carte_theme(corps, i, k)
+                carte_theme(corps, i + 2, k)
         elif n == 1:
-            carte_switch(corps, 0, "Clavier", "Chaque touche pressée (les raccourcis de l'app ne comptent pas).",
-                         "count_keys")
-            carte_switch(corps, 1, "Clics souris", "Clic gauche, droit et molette cliquée.", "count_clicks")
-            carte_switch(corps, 2, "Molette", "Chaque cran de molette.", "count_scroll")
-            carte_choix(corps, 3, "Calcul sur", "Durée prise en compte pour le chiffre en direct.", "window",
-                        (30, 60, 120), lambda o: f"{o} s")
+            carte_switch(corps, 0, T("Keyboard", "Clavier"),
+                         T("Every key press (the app's own hotkeys don't count).",
+                           "Chaque touche pressée (les raccourcis de l'app ne comptent pas)."), "count_keys")
+            carte_switch(corps, 1, T("Mouse clicks", "Clics souris"),
+                         T("Left, right and middle clicks.", "Clic gauche, droit et molette cliquée."), "count_clicks")
+            carte_switch(corps, 2, T("Mouse wheel", "Molette"),
+                         T("Every wheel notch.", "Chaque cran de molette."), "count_scroll")
+            carte_choix(corps, 3, T("Measured over", "Calcul sur"),
+                        T("Time window used for the live number.", "Durée prise en compte pour le chiffre en direct."),
+                        "window", (30, 60, 120), lambda o: f"{o} s")
         elif n == 2:
-            carte_switch(corps, 0, "Suivre le jeu au premier plan",
-                         "Stats par jeu : moyenne, peak et low de chaque session. Navigateurs ignorés.",
+            carte_switch(corps, 0, T("Track the game in focus", "Suivre le jeu au premier plan"),
+                         T("Stats per game: average, peak and low of every session. Browsers are ignored.",
+                           "Stats par jeu : moyenne, peak et low de chaque session. Navigateurs ignorés."),
                          "track_apps")
-            carte_choix(corps, 1, "Pause AFK après", "Sans input, les APM se figent et reprennent dès que tu "
-                                                     "rejoues.", "afk_delay", (5, 10, 30), lambda o: f"{o} s")
-            carte_switch(corps, 2, "Résumé en fin de session", "Une petite carte avec ta moyenne, ton peak et "
-                                                               "ton low.", "session_popup")
-            carte_switch(corps, 3, "Overlay visible au démarrage", "Le chiffre par-dessus tes jeux (F9 pour "
-                                                                   "l'afficher ou le masquer).", "overlay_on_start")
+            carte_choix(corps, 1, T("AFK pause after", "Pause AFK après"),
+                        T("With no input, APM freezes and resumes as soon as you play again.",
+                          "Sans input, les APM se figent et reprennent dès que tu rejoues."),
+                        "afk_delay", (5, 10, 30), lambda o: f"{o} s")
+            carte_switch(corps, 2, T("End-of-session summary", "Résumé en fin de session"),
+                         T("A small card with your average, peak and low.",
+                           "Une petite carte avec ta moyenne, ton peak et ton low."), "session_popup")
+            carte_switch(corps, 3, T("Show overlay on startup", "Overlay visible au démarrage"),
+                         T("The number on top of your games (F9 to show or hide it).",
+                           "Le chiffre par-dessus tes jeux (F9 pour l'afficher ou le masquer)."), "overlay_on_start")
         else:
-            carte_switch(corps, 0, "Lancer avec Windows", "lightAPM démarre tout seul quand tu allumes ton PC.",
-                         "autostart")
-            carte_switch(corps, 1, "Démarrer réduit dans le tray", "Au lancement avec Windows, l'app reste "
-                                                                   "discrète dans la zone de notification.",
+            carte_switch(corps, 0, T("Start with Windows", "Lancer avec Windows"),
+                         T("lightAPM starts by itself when you turn on your PC.",
+                           "lightAPM démarre tout seul quand tu allumes ton PC."), "autostart")
+            carte_switch(corps, 1, T("Start minimized to tray", "Démarrer réduit dans le tray"),
+                         T("When starting with Windows, the app stays quietly in the notification area.",
+                           "Au lancement avec Windows, l'app reste discrète dans la zone de notification."),
                          "start_minimized")
-            carte_switch(corps, 2, "Vérifier les mises à jour", "À chaque démarrage. Rien ne s'installe sans "
-                                                                "ton accord.", "check_updates")
+            carte_switch(corps, 2, T("Check for updates", "Vérifier les mises à jour"),
+                         T("On every startup. Nothing installs without your OK.",
+                           "À chaque démarrage. Rien ne s'installe sans ton accord."), "check_updates")
         bas = ctk.CTkFrame(f, fg_color="transparent", corner_radius=0)
         bas.pack(fill="x", pady=(14, 0))
         style = dict(height=40, corner_radius=10, font=police(14, True))
         if n == 0:
-            ctk.CTkButton(bas, text="Passer", width=100, fg_color="transparent", hover_color=PANEL,
+            ctk.CTkButton(bas, text=T("Skip", "Passer"), width=100, fg_color="transparent", hover_color=PANEL,
                           text_color=MUTED, command=lambda: fini.set(True), **style).pack(side="left")
         else:
-            ctk.CTkButton(bas, text="Retour", width=100, fg_color="transparent", hover_color=PANEL, border_width=1,
+            ctk.CTkButton(bas, text=T("Back", "Retour"), width=100, fg_color="transparent", hover_color=PANEL, border_width=1,
                           border_color=BORDER2, text_color=TXT2, command=lambda: aller(-1), **style).pack(
                 side="left")
         derniere = n == len(ETAPES) - 1
-        ctk.CTkButton(bas, text="C'est parti" if derniere else "Suivant", width=150, fg_color=ACC,
+        ctk.CTkButton(bas, text=T("Let's go", "C'est parti") if derniere else T("Next", "Suivant"), width=150, fg_color=ACC,
                       hover_color=ACC_H, text_color=ON_ACC,
                       command=(lambda: fini.set(True)) if derniere else (lambda: aller(1)), **style).pack(
             side="right")
@@ -1353,7 +1436,7 @@ logo_ctk = creer_logo_ctk()
 logo_lbl = ctk.CTkLabel(logo_box, text="", image=logo_ctk)
 logo_lbl.place(relx=0.5, rely=0.5, anchor="center")
 ctk.CTkLabel(header, text=NOM, font=police(18, True), anchor="w").grid(row=0, column=1, sticky="sw")
-ctk.CTkLabel(header, text="Compteur d'APM", text_color=MUTED, anchor="w", font=police(12)).grid(
+ctk.CTkLabel(header, text=T("APM counter", "Compteur d'APM"), text_color=MUTED, anchor="w", font=police(12)).grid(
     row=1, column=1, sticky="nw")
 live_val = tk.StringVar(value="0")
 ctk.CTkLabel(header, textvariable=live_val, text_color=ACC_H, font=police(30, True, mono=True), anchor="e",
@@ -1570,10 +1653,23 @@ NOMS_CAT = dict(CATEGORIES)
 def il_y_a(ts):
     d = time.time() - ts
     if d < 3600:
-        return f"il y a {max(1, int(d // 60))} min"
+        m = max(1, int(d // 60))
+        return T(f"{m} min ago", f"il y a {m} min")
     if d < 86400:
-        return f"il y a {int(d // 3600)} h"
-    return "hier" if d < 2 * 86400 else f"il y a {int(d // 86400)} j"
+        return T(f"{int(d // 3600)}h ago", f"il y a {int(d // 3600)} h")
+    if d < 2 * 86400:
+        return T("yesterday", "hier")
+    return T(f"{int(d // 86400)} days ago", f"il y a {int(d // 86400)} j")
+
+
+def legende_canvas(cv, s, w, items):
+    """Légende alignée à droite d'un graphique : items = [(dessin(x_droite) -> largeur, texte), ...]."""
+    f = tkfont.Font(family=F_UI, size=8)
+    x = w
+    for dessin, texte in reversed(items):
+        cv.create_text(x, 8 * s, anchor="e", fill=MUTED, font=(F_UI, 8), text=texte)
+        x -= f.measure(texte) + 6 * s
+        x -= dessin(x) + 14 * s
 
 
 def couper(txt, n):
@@ -1640,20 +1736,19 @@ def dessiner_barres(*_):
     items.sort(key=lambda x: x[1], reverse=True)
     items = items[:8]
     cv.create_text(0, 8 * s, anchor="w", fill=MUTED, font=(F_UI, 8, "bold"),
-                   text="MOYENNE PAR " + ("JEU" if cat == "jeux" else "APP"))
+                   text=(T("AVERAGE PER GAME", "MOYENNE PAR JEU") if cat == "jeux"
+                         else T("AVERAGE PER APP", "MOYENNE PAR APP")))
     # légende à droite : rail violet = moyenne, trait blanc = peak record
-    x = w
-    cv.create_text(x, 8 * s, anchor="e", fill=MUTED, font=(F_UI, 8), text="peak record")
-    x -= 74 * s
-    cv.create_line(x, 2 * s, x, 14 * s, fill=TXT, width=max(1, 2 * s))
-    x -= 14 * s
-    cv.create_text(x, 8 * s, anchor="e", fill=MUTED, font=(F_UI, 8), text="moyenne")
-    x -= 62 * s
-    cv.create_line(x - 10 * s, 8 * s, x, 8 * s, fill=ACC, width=6 * s, capstyle="round")
+    legende_canvas(cv, s, w, [
+        (lambda x: cv.create_line(x - 10 * s, 8 * s, x, 8 * s, fill=ACC, width=6 * s, capstyle="round") and 10 * s,
+         T("average", "moyenne")),
+        (lambda x: cv.create_line(x, 2 * s, x, 14 * s, fill=TXT, width=max(1, 2 * s)) and 2 * s,
+         T("best peak", "peak record")),
+    ])
     top, row = 30 * s, 30 * s
     if not items:
         cv.create_text(0, top + 12 * s, anchor="w", fill=DIM, font=(F_UI, 10),
-                       text="Pas encore de session dans cette catégorie.")
+                       text=T("No sessions in this category yet.", "Pas encore de session dans cette catégorie."))
         cv.configure(height=int(top + 30 * s))
         return
     vmax = max(max(p, a) for _, a, p in items) or 1
@@ -1683,10 +1778,10 @@ def ligne_app(i, exe, a):
     ctk.CTkLabel(c, text=a["name"], font=police(15, True), anchor="w", height=22).grid(
         row=0, column=0, sticky="w", padx=(16, 8), pady=(12, 0))
     ctk.CTkLabel(c, text=f"{g['n']} session{'s' if g['n'] > 1 else ''} · {fmt_duree(g['temps'])} · "
-                         f"dernière {il_y_a(a['sessions'][-1]['end'])}",
+                         + T(f"last {il_y_a(a['sessions'][-1]['end'])}", f"dernière {il_y_a(a['sessions'][-1]['end'])}"),
                  font=police(12), text_color=MUTED, anchor="w", height=18).grid(
         row=1, column=0, sticky="w", padx=(16, 8), pady=(0, 12))
-    for col, (val, lib, coul) in enumerate(((g["avg"], "moy", ACC_H), (g["peak_max"], "peak", TXT)), start=1):
+    for col, (val, lib, coul) in enumerate(((g["avg"], T("avg", "moy"), ACC_H), (g["peak_max"], "peak", TXT)), start=1):
         ctk.CTkLabel(c, text=str(val), font=police(20, True, mono=True), text_color=coul, anchor="e",
                      width=58, height=24).grid(row=0, column=col, sticky="e", padx=(4, 0), pady=(10, 0))
         ctk.CTkLabel(c, text=lib, font=police(11), text_color=MUTED, anchor="e", width=58, height=16).grid(
@@ -1716,8 +1811,10 @@ def rafraichir_liste():
     apps = apps_de(vue["cat"])
     titre_liste.configure(text=NOMS_CAT[vue["cat"]].upper())
     if not apps:
-        ctk.CTkLabel(lignes_box, text="Lance un jeu ou une app sur ton écran principal : la session est "
-                                      "enregistrée quand tu la quittes.", text_color=DIM, font=police(12),
+        ctk.CTkLabel(lignes_box, text=T("Launch a game or an app on your main screen: the session is saved "
+                                        "when you leave it.",
+                                        "Lance un jeu ou une app sur ton écran principal : la session est "
+                                        "enregistrée quand tu la quittes."), text_color=DIM, font=police(12),
                      justify="left", anchor="w", wraplength=int(420)).grid(row=0, column=0, sticky="w")
     for i, (exe, a) in enumerate(apps):
         ligne_app(i, exe, a)
@@ -1745,15 +1842,14 @@ def dessiner_courbe(cv, sessions):
     w = max(cv.winfo_width(), int(200 * s))
     h, top, left, right = 200 * s, 34 * s, 34 * s, w - 10 * s
     bot = h - 20 * s
-    cv.create_text(0, 8 * s, anchor="w", fill=MUTED, font=(F_UI, 8, "bold"), text="ÉVOLUTION PAR SESSION")
-    x = w
-    cv.create_text(x, 8 * s, anchor="e", fill=MUTED, font=(F_UI, 8), text="low → peak")
-    x -= 70 * s
-    cv.create_rectangle(x - 10 * s, 4 * s, x, 12 * s, fill=BAND, outline="")
-    x -= 16 * s
-    cv.create_text(x, 8 * s, anchor="e", fill=MUTED, font=(F_UI, 8), text="moyenne")
-    x -= 62 * s
-    cv.create_line(x - 12 * s, 8 * s, x, 8 * s, fill=ACC_H, width=max(1, 2 * s))
+    cv.create_text(0, 8 * s, anchor="w", fill=MUTED, font=(F_UI, 8, "bold"),
+                   text=T("PROGRESS PER SESSION", "ÉVOLUTION PAR SESSION"))
+    legende_canvas(cv, s, w, [
+        (lambda x: cv.create_line(x - 12 * s, 8 * s, x, 8 * s, fill=ACC_H, width=max(1, 2 * s)) and 12 * s,
+         T("average", "moyenne")),
+        (lambda x: cv.create_rectangle(x - 10 * s, 4 * s, x, 12 * s, fill=BAND, outline="") and 10 * s,
+         "low → peak"),
+    ])
     ss = sessions[-30:]
     if not ss:
         return
@@ -1810,7 +1906,8 @@ def changer_cat(exe, nom):
 
 
 def renommer(exe):
-    d = ctk.CTkInputDialog(text=f"Nouveau nom pour {stats['apps'][exe]['name']} :", title="Renommer")
+    d = ctk.CTkInputDialog(text=T(f"New name for {stats['apps'][exe]['name']}:",
+                                  f"Nouveau nom pour {stats['apps'][exe]['name']} :"), title=T("Rename", "Renommer"))
     nom = (d.get_input() or "").strip()
     if nom:
         stats["apps"][exe]["name"] = nom[:40]
@@ -1819,10 +1916,10 @@ def renommer(exe):
 
 
 def supprimer(exe, bouton):
-    if bouton.cget("text") != "Confirmer ?":  # 2 clics pour éviter les accidents
-        bouton.configure(text="Confirmer ?", fg_color="#3a1220", hover_color="#4c1729")
+    if bouton.cget("text") != T("Confirm?", "Confirmer ?"):  # 2 clics pour éviter les accidents
+        bouton.configure(text=T("Confirm?", "Confirmer ?"), fg_color="#3a1220", hover_color="#4c1729")
         root.after(3000, lambda: bouton.winfo_exists() and bouton.configure(
-            text="Supprimer", fg_color="transparent", hover_color=PANEL))
+            text=T("Delete", "Supprimer"), fg_color="transparent", hover_color=PANEL))
         return
     stats["apps"].pop(exe, None)
     sauver_stats()
@@ -1850,7 +1947,7 @@ def construire_detail():
                   command=fermer_detail).grid(row=0, column=0, rowspan=2, padx=(0, 12))
     ctk.CTkLabel(haut, text=a["name"], font=police(19, True), anchor="w", height=24).grid(
         row=0, column=1, sticky="sw")
-    ctk.CTkLabel(haut, text=f"{g['n']} session{'s' if g['n'] > 1 else ''} · {fmt_duree(g['temps'])} au total",
+    ctk.CTkLabel(haut, text=f"{g['n']} session{'s' if g['n'] > 1 else ''} · {fmt_duree(g['temps'])} " + T("total", "au total"),
                  font=police(12), text_color=MUTED, anchor="w", height=18).grid(row=1, column=1, sticky="nw")
     m = ctk.CTkOptionMenu(haut, values=[n for _, n in CATEGORIES], width=124, height=30, corner_radius=15,
                           font=police(12, True), dropdown_font=police(12),
@@ -1863,10 +1960,10 @@ def construire_detail():
     for i in range(4):
         tuiles.columnconfigure(i, weight=1, uniform="t")
     tend = g["avg5"] - g["avg"]
-    tuile(tuiles, 0, "Moyenne", g["avg"], fort=True)
+    tuile(tuiles, 0, T("Average", "Moyenne"), g["avg"], fort=True)
     tuile(tuiles, 1, "Peak", g["peak_max"])
-    tuile(tuiles, 2, "Low moy", g["low_moy"])
-    tuile(tuiles, 3, "Tendance", f"{'+' if tend >= 0 else '−'}{abs(tend)}")
+    tuile(tuiles, 2, T("Avg low", "Low moy"), g["low_moy"])
+    tuile(tuiles, 3, T("Trend", "Tendance"), f"{'+' if tend >= 0 else '−'}{abs(tend)}")
 
     carte = ctk.CTkFrame(box, fg_color=PANEL, border_width=1, border_color=BORDER, corner_radius=14)
     carte.grid(row=2, column=0, sticky="ew", pady=(0, 16))
@@ -1880,7 +1977,7 @@ def construire_detail():
     largeurs = (0, 70, 52, 52, 52)
     for j, lw in enumerate(largeurs):
         table.columnconfigure(j, weight=1 if j == 0 else 0, minsize=lw)
-    entete = ("DATE", "DURÉE", "MOY", "PEAK", "LOW")
+    entete = ("DATE", T("LENGTH", "DURÉE"), T("AVG", "MOY"), "PEAK", "LOW")
     for j, txt in enumerate(entete):
         ctk.CTkLabel(table, text=txt, font=police(10, True), text_color=DIM, anchor="w" if j == 0 else "e",
                      height=22).grid(row=0, column=j, sticky="ew", padx=(12 if j == 0 else 0, 12 if j == 4 else 0))
@@ -1899,9 +1996,9 @@ def construire_detail():
     bas.grid(row=5, column=0, sticky="w", pady=(16, 4))
     style = dict(height=36, width=110, corner_radius=10, fg_color="transparent", hover_color=PANEL,
                  border_width=1, border_color=BORDER2, font=police(13))
-    ctk.CTkButton(bas, text="Renommer", text_color=TXT2, command=lambda: renommer(exe), **style).pack(
+    ctk.CTkButton(bas, text=T("Rename", "Renommer"), text_color=TXT2, command=lambda: renommer(exe), **style).pack(
         side="left", padx=(0, 8))
-    b = ctk.CTkButton(bas, text="Supprimer", text_color=DANGER, **style)
+    b = ctk.CTkButton(bas, text=T("Delete", "Supprimer"), text_color=DANGER, **style)
     b.configure(command=lambda: supprimer(exe, b))
     b.pack(side="left")
     vue_detail._parent_canvas.yview_moveto(0)
@@ -1922,14 +2019,14 @@ def toast_session(nom, r):
     w.configure(bg=ACC_D)
     f = ctk.CTkFrame(w, corner_radius=0, fg_color=PANEL)
     f.pack(padx=1, pady=1)
-    ctk.CTkLabel(f, text="SESSION TERMINÉE", font=police(10, True), text_color=ACC, anchor="w", height=16).pack(
+    ctk.CTkLabel(f, text=T("SESSION OVER", "SESSION TERMINÉE"), font=police(10, True), text_color=ACC, anchor="w", height=16).pack(
         fill="x", padx=16, pady=(12, 0))
     ctk.CTkLabel(f, text=nom, font=police(15, True), anchor="w", height=22).pack(fill="x", padx=16)
     ctk.CTkLabel(f, text=f"{fmt_duree(r['duration'])} · {r['actions']} actions", text_color=MUTED,
                  font=police(12), anchor="w", height=18).pack(fill="x", padx=16)
     row = ctk.CTkFrame(f, fg_color="transparent", corner_radius=0)
     row.pack(fill="x", padx=16, pady=(10, 14))
-    for titre, v, fort in (("MOY", r["avg"], True), ("PEAK", r["peak"], False), ("LOW", r["low"], False)):
+    for titre, v, fort in ((T("AVG", "MOY"), r["avg"], True), ("PEAK", r["peak"], False), ("LOW", r["low"], False)):
         c = ctk.CTkFrame(row, fg_color=FIELD if fort else BG, border_width=1, border_color=BORDER2 if fort else BORDER,
                          corner_radius=10)
         c.pack(side="left", padx=(0, 8))
@@ -1967,16 +2064,18 @@ def maj_live_jeu():
     ouv = suivi["ouvertes"]
     s = ouv.get(suivi["actuel"])
     if s:
-        etat = ("EN COURS", ACC, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
-                (f"{round(s.actions * 60 / s.duree)} moy" if s.duree >= MIN_MOY_LIVE else "calcul…"))
+        etat = (T("PLAYING", "EN COURS"), ACC, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
+                (f"{round(s.actions * 60 / s.duree)} " + T("avg", "moy") if s.duree >= MIN_MOY_LIVE
+                 else T("measuring…", "calcul…")))
     elif ouv:
         s = max(ouv.values(), key=lambda x: x.vu)
-        etat = ("EN PAUSE", MUTED, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
-                (f"{round(s.actions * 60 / s.duree)} moy" if s.duree >= MIN_MOY_LIVE else "calcul…"))
+        etat = (T("PAUSED", "EN PAUSE"), MUTED, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
+                (f"{round(s.actions * 60 / s.duree)} " + T("avg", "moy") if s.duree >= MIN_MOY_LIVE
+                 else T("measuring…", "calcul…")))
     elif not cfg["track_apps"]:
-        etat = ("INACTIF", DIM, "Suivi désactivé (Options)", "", "")
+        etat = (T("OFF", "INACTIF"), DIM, T("Tracking disabled (Options)", "Suivi désactivé (Options)"), "", "")
     else:
-        etat = ("EN ATTENTE", DIM, "Aucune app au premier plan", "", "")
+        etat = (T("WAITING", "EN ATTENTE"), DIM, T("No app in focus", "Aucune app au premier plan"), "", "")
     if etat == _live_prec[0]:
         return
     _live_prec[0] = etat
@@ -2106,14 +2205,16 @@ def icone(cle, couleur, taille=16):
     return ctk.CTkImage(light_image=im, dark_image=im, size=(taille, taille))
 
 
-CATS_OPT = (("apparence", "Apparence", "Thème de couleur de l'app"),
-            ("overlay", "Overlay", "Le compteur affiché par-dessus tes jeux"),
-            ("calcul", "Calcul", "Ce qui compte comme une action, et sur quelle durée"),
-            ("raccourcis", "Raccourcis", "Touches pour piloter l'overlay en jeu"),
-            ("sessions", "Sessions", "Détection du jeu au premier plan et stats par jeu"),
-            ("demarrage", "Démarrage", "Comment lightAPM se lance"),
-            ("maj", "Mises à jour", "Rien ne s'installe sans ton accord"),
-            ("application", "Application", "Fenêtre, assistant et remise à zéro"))
+CATS_OPT = (("apparence", T("Appearance", "Apparence"), T("Language and color theme", "Langue et thème de couleur")),
+            ("overlay", "Overlay", T("The counter shown on top of your games", "Le compteur affiché par-dessus tes jeux")),
+            ("calcul", T("Calculation", "Calcul"),
+             T("What counts as an action, and over how long", "Ce qui compte comme une action, et sur quelle durée")),
+            ("raccourcis", T("Hotkeys", "Raccourcis"),
+             T("Keys to control the overlay in game", "Touches pour piloter l'overlay en jeu")),
+            ("sessions", "Sessions", T("Game detection and per-game stats", "Détection du jeu au premier plan et stats par jeu")),
+            ("demarrage", T("Startup", "Démarrage"), T("How lightAPM starts", "Comment lightAPM se lance")),
+            ("maj", T("Updates", "Mises à jour"), T("Nothing installs without your OK", "Rien ne s'installe sans ton accord")),
+            ("application", "Application", T("Window, assistant and reset", "Fenêtre, assistant et remise à zéro")))
 pages_opt, boutons_opt, icones_opt = {}, {}, {}
 opt_actif = [None]
 
@@ -2147,7 +2248,23 @@ ctk.CTkLabel(cote, text=f"v{VERSION}", font=police(11, mono=True), text_color=DI
 
 # --- Apparence ---
 P = pages_opt["apparence"]
-g = Groupe(P, "Thème")
+g = Groupe(P, T("Language", "Langue"))
+LANGUE_ACTIVE = LANGUE
+
+
+def choisir_langue_opt(nom):
+    cfg["language"] = "fr" if nom == "Français" else "en"
+    save()
+    maj_bouton_redemarrer()
+
+
+langue_seg = ctk.CTkSegmentedButton(g.c, values=["English", "Français"], font=police(12, True), height=30,
+                                    text_color=TXT2, selected_color=ACC, selected_hover_color=ACC_H,
+                                    unselected_color=BG, unselected_hover_color=TRACK, fg_color=BG,
+                                    command=choisir_langue_opt)
+langue_seg.set("Français" if LANGUE == "fr" else "English")
+g.ligne(T("App language", "Langue de l'app"), langue_seg)
+g = Groupe(P, T("Theme", "Thème"))
 theme_box = ctk.CTkFrame(g.c, fg_color="transparent", corner_radius=0)
 theme_btns = {}
 THEME_ACTIF = cfg["theme"]
@@ -2156,11 +2273,19 @@ for _k, (_nom, _acc, _h, _d) in THEMES.items():
                                    hover_color=_h, border_width=3, border_color=PANEL,
                                    command=lambda k=_k: choisir_theme_opt(k))
     theme_btns[_k].pack(side="left", padx=(6, 0))
-theme_aide = g.ligne("Couleur d'accent", theme_box, "")
-theme_go = ctk.CTkButton(g.c, text="Redémarrer pour appliquer", width=CW,
+theme_aide = g.ligne(T("Accent color", "Couleur d'accent"), theme_box, "")
+g = Groupe(P, T("Apply", "Appliquer"))
+theme_go = ctk.CTkButton(g.c, text=T("Restart to apply", "Redémarrer pour appliquer"), width=CW,
                          **dict(BTN, fg_color=ACC, hover_color=ACC_H, text_color=ON_ACC, border_width=0,
                                 font=police(12, True)), command=lambda: redemarrer())
-theme_go_aide = g.ligne("Appliquer le thème", theme_go, "Tes stats sont gardées")
+theme_go_aide = g.ligne(T("Language and theme", "Langue et thème"), theme_go,
+                        T("Your stats are kept", "Tes stats sont gardées"))
+
+
+def maj_bouton_redemarrer():
+    change = cfg["theme"] != THEME_ACTIF or cfg["language"] != LANGUE_ACTIVE
+    theme_go.configure(state="normal" if change else "disabled", fg_color=ACC if change else TRACK,
+                       text_color=ON_ACC if change else DIM)
 
 
 def choisir_theme_opt(k):
@@ -2168,10 +2293,9 @@ def choisir_theme_opt(k):
     save()
     for c, b in theme_btns.items():
         b.configure(border_color=TXT if c == k else PANEL)
-    theme_aide.configure(text=THEMES[k][0] + ("" if k == THEME_ACTIF else " · pas encore appliqué"))
-    theme_go.configure(state="normal" if k != THEME_ACTIF else "disabled",
-                       fg_color=ACC if k != THEME_ACTIF else TRACK,
-                       text_color=ON_ACC if k != THEME_ACTIF else DIM)
+    theme_aide.configure(text=THEMES[k][0] + ("" if k == THEME_ACTIF else T(" · not applied yet",
+                                                                            " · pas encore appliqué")))
+    maj_bouton_redemarrer()
 
 
 choisir_theme_opt(cfg["theme"])
@@ -2183,8 +2307,8 @@ apercu_box.pack(fill="x", padx=(0, 6), pady=(0, 12))
 apercu_box.pack_propagate(False)
 _ap_txt = ctk.CTkFrame(apercu_box, fg_color="transparent", corner_radius=0)
 _ap_txt.pack(side="left", padx=20)
-legende(_ap_txt, "Aperçu").pack(anchor="w")
-ctk.CTkLabel(_ap_txt, text="Mis à jour en direct", font=police(12), text_color=DIM, anchor="w", height=16).pack(
+legende(_ap_txt, T("Preview", "Aperçu")).pack(anchor="w")
+ctk.CTkLabel(_ap_txt, text=T("Updates live", "Mis à jour en direct"), font=police(12), text_color=DIM, anchor="w", height=16).pack(
     anchor="w")
 apercu = tk.Canvas(apercu_box, bg=FIELD, highlightthickness=0, width=int(150 * SC), height=int(80 * SC))
 apercu.pack(side="right", padx=16)
@@ -2209,8 +2333,8 @@ def maj_apercu():
 
 APRES_RESTYLE.append(maj_apercu)
 
-g = Groupe(P, "Texte")
-slider(g, "Taille", size_v, 8, 120, 112, lambda v: f"{int(round(v))}")
+g = Groupe(P, T("Text", "Texte"))
+slider(g, T("Size", "Taille"), size_v, 8, 120, 112, lambda v: f"{int(round(v))}")
 installees = {f.lower() for f in tkfont.families()}
 candidates = ["Consolas", "Segoe UI", "Segoe UI Semibold", "Bahnschrift", "Cascadia Mono", "Arial",
               "Verdana", "Tahoma", "Trebuchet MS", "Courier New", "Lucida Console", "Impact", "Calibri"]
@@ -2221,37 +2345,40 @@ combo = ctk.CTkComboBox(g.c, values=polices, width=CW, height=30, corner_radius=
                         font=police(12), dropdown_font=police(12), command=lambda v: font_v.set(v))
 combo.set(cfg["font"])
 combo.bind("<Return>", lambda e: font_v.set(combo.get()))
-g.ligne("Police", combo)
-switch(g, "Gras", bold_v)
-g.ligne("Texte après le chiffre", ctk.CTkEntry(g.c, textvariable=suffix_v, width=CW, height=30, corner_radius=8,
-                                              border_width=1, font=police(12), placeholder_text="ex. APM"))
+g.ligne(T("Font", "Police"), combo)
+switch(g, T("Bold", "Gras"), bold_v)
+g.ligne(T("Text after the number", "Texte après le chiffre"), ctk.CTkEntry(g.c, textvariable=suffix_v, width=CW, height=30, corner_radius=8,
+                                              border_width=1, font=police(12), placeholder_text=T("e.g. APM", "ex. APM")))
 
-g = Groupe(P, "Couleurs")
-g.ligne("Chiffre", bouton_couleur(g.c, "color"))
-switch(g, "Contour", outline_v, "Lisible sur tous les fonds")
-g.ligne("Couleur du contour", bouton_couleur(g.c, "outline_color"))
-slider(g, "Opacité", opac_v, 0.1, 1.0, 90, lambda v: f"{int(round(v * 100))}%")
+g = Groupe(P, T("Colors", "Couleurs"))
+g.ligne(T("Number", "Chiffre"), bouton_couleur(g.c, "color"))
+switch(g, T("Outline", "Contour"), outline_v, T("Readable on any background", "Lisible sur tous les fonds"))
+g.ligne(T("Outline color", "Couleur du contour"), bouton_couleur(g.c, "outline_color"))
+slider(g, T("Opacity", "Opacité"), opac_v, 0.1, 1.0, 90, lambda v: f"{int(round(v * 100))}%")
 
 g = Groupe(P, "Placement")
-switch(g, "Verrouillé au démarrage", sl_v, "Clics traversants : ne gêne pas en jeu")
+switch(g, T("Locked on startup", "Verrouillé au démarrage"), sl_v,
+       T("Click-through: never gets in the way in game", "Clics traversants : ne gêne pas en jeu"))
 
 # --- Calcul ---
 P = pages_opt["calcul"]
-g = Groupe(P, "Actions comptées")
-switch(g, "Touches clavier", ck_v, "Les raccourcis de l'app ne comptent pas")
-switch(g, "Clics souris", cc_v)
-switch(g, "Molette", cs_v)
-g = Groupe(P, "Calcul")
-slider(g, "Fenêtre glissante", win_v, 5, 180, 175, lambda v: f"{int(round(v))} s",
-       "Durée prise en compte pour le chiffre en direct")
-slider(g, "Rafraîchissement", ref_v, 20, 500, 48, lambda v: f"{int(round(v / 10)) * 10} ms")
+g = Groupe(P, T("Counted actions", "Actions comptées"))
+switch(g, T("Keyboard keys", "Touches clavier"), ck_v,
+       T("The app's own hotkeys don't count", "Les raccourcis de l'app ne comptent pas"))
+switch(g, T("Mouse clicks", "Clics souris"), cc_v)
+switch(g, T("Mouse wheel", "Molette"), cs_v)
+g = Groupe(P, T("Calculation", "Calcul"))
+slider(g, T("Rolling window", "Fenêtre glissante"), win_v, 5, 180, 175, lambda v: f"{int(round(v))} s",
+       T("Time window used for the live number", "Durée prise en compte pour le chiffre en direct"))
+slider(g, T("Refresh rate", "Rafraîchissement"), ref_v, 20, 500, 48, lambda v: f"{int(round(v / 10)) * 10} ms")
 g = Groupe(P, "Pause AFK")
-slider(g, "Pause après", afk_v, 3, 60, 57, lambda v: f"{int(round(v))} s",
-       "Sans input, les APM se figent et reprennent dès que tu rejoues")
+slider(g, T("Pause after", "Pause après"), afk_v, 3, 60, 57, lambda v: f"{int(round(v))} s",
+       T("With no input, APM freezes and resumes as soon as you play again",
+         "Sans input, les APM se figent et reprennent dès que tu rejoues"))
 
 # --- Raccourcis ---
 P = pages_opt["raccourcis"]
-g = Groupe(P, "Touches")
+g = Groupe(P, T("Keys", "Touches"))
 hk_btn = {}
 
 
@@ -2261,54 +2388,63 @@ def hk_text(nom):
 
 def start_capture(nom):
     capture["target"] = nom
-    hk_btn[nom].configure(text="Appuie sur une touche…", text_color=ACC_H, border_color=ACC)
+    hk_btn[nom].configure(text=T("Press a key…", "Appuie sur une touche…"), text_color=ACC_H, border_color=ACC)
 
 
-for nom, lib in (("hk_lock", "Verrouiller / déverrouiller"), ("hk_toggle", "Afficher / masquer l'overlay")):
+for nom, lib in (("hk_lock", T("Lock / unlock overlay", "Verrouiller / déverrouiller")),
+                 ("hk_toggle", T("Show / hide overlay", "Afficher / masquer l'overlay"))):
     hk_btn[nom] = ctk.CTkButton(g.c, text=hk_text(nom), width=CW, command=lambda n=nom: start_capture(n),
                                 **dict(BTN, font=police(12, True, mono=True)))
-    g.ligne(lib, hk_btn[nom], "Clique, puis appuie sur une touche")
+    g.ligne(lib, hk_btn[nom], T("Click, then press a key", "Clique, puis appuie sur une touche"))
 
 # --- Sessions ---
 P = pages_opt["sessions"]
-g = Groupe(P, "Suivi")
-switch(g, "Suivre le jeu au premier plan", track_v, "Sur l'écran principal · navigateurs ignorés")
-slider(g, "Fin après une pause de", gap_v, 1, 30, 29, lambda v: f"{int(round(v))} min",
-       "Si tu reviens avant, la session continue")
-switch(g, "Résumé en fin de session", popup_v, "Moyenne, peak et low dans une petite carte")
+g = Groupe(P, T("Tracking", "Suivi"))
+switch(g, T("Track the game in focus", "Suivre le jeu au premier plan"), track_v,
+       T("On the main screen · browsers ignored", "Sur l'écran principal · navigateurs ignorés"))
+slider(g, T("End after a break of", "Fin après une pause de"), gap_v, 1, 30, 29, lambda v: f"{int(round(v))} min",
+       T("Come back before that and the session continues", "Si tu reviens avant, la session continue"))
+switch(g, T("End-of-session summary", "Résumé en fin de session"), popup_v,
+       T("Average, peak and low in a small card", "Moyenne, peak et low dans une petite carte"))
 
 # --- Démarrage ---
 P = pages_opt["demarrage"]
-g = Groupe(P, "Lancement")
-switch(g, "Lancer avec Windows", auto_v, "Sans droits administrateur")
-switch(g, "Réduit dans le tray", smin_v, "Quand l'app se lance avec Windows")
-switch(g, "Overlay visible au démarrage", ovs_v)
+g = Groupe(P, T("Launch", "Lancement"))
+switch(g, T("Start with Windows", "Lancer avec Windows"), auto_v,
+       T("No administrator rights needed", "Sans droits administrateur"))
+switch(g, T("Minimized to tray", "Réduit dans le tray"), smin_v,
+       T("When the app starts with Windows", "Quand l'app se lance avec Windows"))
+switch(g, T("Show overlay on startup", "Overlay visible au démarrage"), ovs_v)
 
 # --- Mises à jour ---
 P = pages_opt["maj"]
 g = Groupe(P, "Version")
-g.ligne("Version installée", ctk.CTkLabel(g.c, text=f"v{VERSION}", font=police(13, True, mono=True),
+g.ligne(T("Installed version", "Version installée"), ctk.CTkLabel(g.c, text=f"v{VERSION}", font=police(13, True, mono=True),
                                          text_color=ACC_H, anchor="e"))
-switch(g, "Vérifier au démarrage", chk_v)
+switch(g, T("Check on startup", "Vérifier au démarrage"), chk_v)
 
 
 def verifier_clic():
-    maj_statut.configure(text="Vérification…")
+    maj_statut.configure(text=T("Checking…", "Vérification…"))
     verifier_maj(manuel=True)
 
 
-maj_statut = g.ligne("Rechercher maintenant", ctk.CTkButton(g.c, text="Rechercher une mise à jour", width=CW,
+maj_statut = g.ligne(T("Check now", "Rechercher maintenant"),
+                     ctk.CTkButton(g.c, text=T("Check for updates", "Rechercher une mise à jour"), width=CW,
                                                             command=verifier_clic, **BTN), etat_maj["texte"])
-g = Groupe(P, "Nouveautés")
-g.ligne("Ce qui a changé", ctk.CTkButton(g.c, text="Quoi de neuf", width=CW, command=quoi_de_neuf, **BTN),
+g = Groupe(P, T("What's new", "Nouveautés"))
+g.ligne(T("Recent changes", "Ce qui a changé"),
+        ctk.CTkButton(g.c, text=T("What's new", "Quoi de neuf"), width=CW, command=quoi_de_neuf, **BTN),
         f"Version {VERSION}")
 
 # --- Application ---
 P = pages_opt["application"]
-g = Groupe(P, "Fenêtre")
-switch(g, "Réduire dans le tray", tray_v, "Le bouton réduire envoie l'app dans la zone de notification")
+g = Groupe(P, T("Window", "Fenêtre"))
+switch(g, T("Minimize to tray", "Réduire dans le tray"), tray_v,
+       T("The minimize button sends the app to the notification area",
+         "Le bouton réduire envoie l'app dans la zone de notification"))
 GARDER = ("x", "y", "placed", "logo_path", "theme", "setup_done", "win_geom", "last_version", "update_url",
-          "autostart")
+          "autostart", "language")
 
 
 def reset_all():
@@ -2340,22 +2476,26 @@ def relancer_assistant():
 
 
 g = Groupe(P, "Configuration")
-g.ligne("Écran de configuration", ctk.CTkButton(g.c, text="Relancer l'assistant", width=CW,
-                                                command=relancer_assistant, **BTN), "Thème, inputs, démarrage…")
-reset_btn = ctk.CTkButton(g.c, text="Tout réinitialiser", width=CW, **dict(BTN, text_color=DANGER))
+g.ligne(T("Setup assistant", "Écran de configuration"),
+        ctk.CTkButton(g.c, text=T("Run the assistant again", "Relancer l'assistant"), width=CW,
+                      command=relancer_assistant, **BTN),
+        T("Language, theme, inputs, startup…", "Langue, thème, inputs, démarrage…"))
+reset_btn = ctk.CTkButton(g.c, text=T("Reset everything", "Tout réinitialiser"), width=CW,
+                          **dict(BTN, text_color=DANGER))
 
 
 def reset_confirme():
-    if reset_btn.cget("text") != "Confirmer ?":  # 2 clics pour éviter les accidents
-        reset_btn.configure(text="Confirmer ?", fg_color="#3a1220")
-        root.after(3000, lambda: reset_btn.configure(text="Tout réinitialiser", fg_color=BG))
+    if reset_btn.cget("text") != T("Confirm?", "Confirmer ?"):  # 2 clics pour éviter les accidents
+        reset_btn.configure(text=T("Confirm?", "Confirmer ?"), fg_color="#3a1220")
+        root.after(3000, lambda: reset_btn.configure(text=T("Reset everything", "Tout réinitialiser"), fg_color=BG))
         return
-    reset_btn.configure(text="Tout réinitialiser", fg_color=BG)
+    reset_btn.configure(text=T("Reset everything", "Tout réinitialiser"), fg_color=BG)
     reset_all()
 
 
 reset_btn.configure(command=reset_confirme)
-g.ligne("Réglages par défaut", reset_btn, "Tes stats et ton thème sont gardés")
+g.ligne(T("Default settings", "Réglages par défaut"), reset_btn,
+        T("Your stats, language and theme are kept", "Tes stats, ta langue et ton thème sont gardés"))
 
 montrer_opt("overlay" if cfg["setup_done"] else "apparence")
 maj_apercu()
@@ -2423,7 +2563,8 @@ def update():
             _dernier[0] = (val, afk, calibrage)
             live_val.set(str(val))
             maj_apercu()
-            live_lbl.configure(text="EN PAUSE · AFK" if afk else ("CALIBRAGE…" if calibrage else "APM LIVE"),
+            live_lbl.configure(text=T("PAUSED · AFK", "EN PAUSE · AFK") if afk else (T("CALIBRATING…", "CALIBRAGE…") if calibrage
+                                                                    else "APM LIVE"),
                                text_color=DIM if (afk or calibrage) else MUTED)
     root.after(cfg["refresh"], update)
 

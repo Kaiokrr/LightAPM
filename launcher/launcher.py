@@ -28,6 +28,23 @@ MODULES = "import customtkinter, pynput, pystray, PIL"
 SANS_CONSOLE = 0x08000000  # CREATE_NO_WINDOW
 
 
+def _langue():
+    """Langue choisie dans l'app (data/config.json), anglais par défaut."""
+    try:
+        import json
+        with open(os.path.join(DATA, "config.json"), encoding="utf-8") as f:
+            return json.load(f).get("language", "en")
+    except Exception:
+        return "en"
+
+
+LANGUE = _langue()
+
+
+def T(en, fr):
+    return fr if LANGUE == "fr" else en
+
+
 def message(texte, titre=NOM, style=0x40):
     """Boîte de message Windows (0x40 info, 0x10 erreur, 0x24 question oui/non). Renvoie 6 pour Oui."""
     return ctypes.windll.user32.MessageBoxW(None, texte, titre, style)
@@ -77,14 +94,18 @@ def trouver_python():
 
 
 def installer_python():
-    if message("Python n'est pas installé sur ce PC, et lightAPM en a besoin.\n\n"
-               "L'installer maintenant (Python 3.12, sans droits administrateur) ?", style=0x24) != 6:
+    if message(T("Python isn't installed on this PC, and lightAPM needs it.\n\n"
+                 "Install it now (Python 3.12, no administrator rights needed)?",
+                 "Python n'est pas installé sur ce PC, et lightAPM en a besoin.\n\n"
+                 "L'installer maintenant (Python 3.12, sans droits administrateur) ?"), style=0x24) != 6:
         return None
     if not shutil.which("winget"):
-        message("Installe Python depuis https://www.python.org/downloads/ "
-                "(coche « Add python.exe to PATH »), puis relance lightAPM.exe.")
+        message(T("Install Python from https://www.python.org/downloads/ "
+                  "(tick \"Add python.exe to PATH\"), then run lightAPM.exe again.",
+                  "Installe Python depuis https://www.python.org/downloads/ "
+                  "(coche « Add python.exe to PATH »), puis relance lightAPM.exe."))
         return None
-    ok = Progression("Installation de Python 3.12…").lancer(
+    ok = Progression(T("Installing Python 3.12…", "Installation de Python 3.12…")).lancer(
         ["winget", "install", "-e", "--id", "Python.Python.3.12", "--scope", "user",
          "--accept-package-agreements", "--accept-source-agreements", "--silent"])
     return trouver_python() if ok else None
@@ -113,7 +134,8 @@ def installer_deps(python):
     if executer([python, "-m", "pip", "--version"]).returncode != 0:
         executer([python, "-m", "ensurepip", "--user"], timeout=300)
     cmd = [python, "-m", "pip", "install", "--user", "--disable-pip-version-check", "-r", REQ]
-    return Progression("Installation des composants de lightAPM…\nÇa n'arrive qu'une fois.").lancer(cmd)
+    return Progression(T("Installing lightAPM components…\nThis only happens once.",
+                          "Installation des composants de lightAPM…\nÇa n'arrive qu'une fois.")).lancer(cmd)
 
 
 class Progression:
@@ -163,7 +185,8 @@ class Progression:
 
 def main():
     if not os.path.exists(APP):
-        message(f"Fichier introuvable :\n{APP}\n\nGarde lightAPM.exe à la racine du dossier lightAPM.",
+        message(T(f"File not found:\n{APP}\n\nKeep lightAPM.exe at the root of the lightAPM folder.",
+                  f"Fichier introuvable :\n{APP}\n\nGarde lightAPM.exe à la racine du dossier lightAPM."),
                 style=0x10)
         return
     python = trouver_python() or installer_python()
@@ -172,8 +195,9 @@ def main():
     os.makedirs(DATA, exist_ok=True)
     if not deps_ok(python):
         if not installer_deps(python) or executer([python, "-c", MODULES]).returncode != 0:
-            message("L'installation des composants a échoué.\n\nOuvre un terminal et lance :\n"
-                    f'"{python}" -m pip install -r "{REQ}"', style=0x10)
+            message(T("Installing the components failed.\n\nOpen a terminal and run:\n",
+                      "L'installation des composants a échoué.\n\nOuvre un terminal et lance :\n")
+                    + f'"{python}" -m pip install -r "{REQ}"', style=0x10)
             return
     with open(MARQUEUR, "w", encoding="utf-8") as f:
         f.write(signature(python))

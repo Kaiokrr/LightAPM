@@ -1,9 +1,12 @@
 {
-  "version": "1.5.0",
-  "url": "https://raw.githubusercontent.com/Kaiokrr/lightAPM/main/app/lightapm.py",
+  "version": "1.6.0",
+  "url": "https://raw.githubusercontent.com/Kaiokrr/LightAPM/main/app/lightapm.py",
   "notes": [
-    "Options rangées par catégorie, avec un aperçu de l'overlay en direct",
-    "Un seul lightAPM.exe pour tout installer et lancer",
-    "Tes réglages et tes stats sont maintenant dans le dossier data/"
+    "lightAPM is now in English, with French available in Options > Appearance",
+    "Language choice in the setup assistant"
+  ],
+  "notes_fr": [
+    "lightAPM est maintenant en anglais, avec le français au choix dans Options > Apparence",
+    "Choix de la langue dans l'assistant de configuration"
   ]
 }
