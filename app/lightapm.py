@@ -2160,7 +2160,7 @@ theme_aide = g.ligne("Couleur d'accent", theme_box, "")
 theme_go = ctk.CTkButton(g.c, text="Redémarrer pour appliquer", width=CW,
                          **dict(BTN, fg_color=ACC, hover_color=ACC_H, text_color=ON_ACC, border_width=0,
                                 font=police(12, True)), command=lambda: redemarrer())
-theme_go_aide = g.ligne("Appliquer le thème", theme_go, "L'app redémarre en gardant tes stats")
+theme_go_aide = g.ligne("Appliquer le thème", theme_go, "Tes stats sont gardées")
 
 
 def choisir_theme_opt(k):
