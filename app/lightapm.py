@@ -75,13 +75,19 @@ MIN_SESSION = 60  # secondes au premier plan en dessous desquelles une session e
 AFK_APM = 5  # minute sous ce seuil = AFK, ignorée pour le "low"
 APP_ID = "kaio.lightapm"
 WIN = sys.platform == "win32"
-VERSION = "1.6.0"
+VERSION = "1.6.1"
 # Mises à jour : URL d'un petit fichier JSON {"version": "1.5.0", "url": "<lien du .py>", "notes": [...]}
 # (ex. sur GitHub : https://raw.githubusercontent.com/<toi>/lightAPM/main/version.json).
 # Peut aussi être mise dans apm_counter.json, clé "update_url".
 UPDATE_URL = "https://raw.githubusercontent.com/Kaiokrr/lightAPM/main/version.json"
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 NOUVEAUTES = {  # version: {"en": [...], "fr": [...]}
+    "1.6.1": {
+        "en": ["lightAPM.exe now downloads and installs Python by itself on PCs that don't have it",
+               "Fixed a crash in the live session banner after deleting a game that was being tracked"],
+        "fr": ["lightAPM.exe télécharge et installe maintenant Python tout seul sur les PC qui ne l'ont pas",
+               "Correction d'un plantage du bandeau de session après la suppression d'un jeu en cours de suivi"],
+    },
     "1.6.0": {
         "en": ["lightAPM is now in English, with French available in Options > Appearance",
                "Language choice in the setup assistant"],
@@ -1922,6 +1928,7 @@ def supprimer(exe, bouton):
             text=T("Delete", "Supprimer"), fg_color="transparent", hover_color=PANEL))
         return
     stats["apps"].pop(exe, None)
+    suivi["ouvertes"].pop(exe, None)  # sa session en cours est abandonnée avec elle
     sauver_stats()
     fermer_detail()
 
@@ -2060,16 +2067,20 @@ def fermer_session(s, popup=True):
 _live_prec = [None]
 
 
+def nom_app(exe):
+    return stats["apps"].get(exe, {}).get("name", exe)
+
+
 def maj_live_jeu():
     ouv = suivi["ouvertes"]
     s = ouv.get(suivi["actuel"])
     if s:
-        etat = (T("PLAYING", "EN COURS"), ACC, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
+        etat = (T("PLAYING", "EN COURS"), ACC, nom_app(s.exe), fmt_chrono(s.duree),
                 (f"{round(s.actions * 60 / s.duree)} " + T("avg", "moy") if s.duree >= MIN_MOY_LIVE
                  else T("measuring…", "calcul…")))
     elif ouv:
         s = max(ouv.values(), key=lambda x: x.vu)
-        etat = (T("PAUSED", "EN PAUSE"), MUTED, stats["apps"][s.exe]["name"], fmt_chrono(s.duree),
+        etat = (T("PAUSED", "EN PAUSE"), MUTED, nom_app(s.exe), fmt_chrono(s.duree),
                 (f"{round(s.actions * 60 / s.duree)} " + T("avg", "moy") if s.duree >= MIN_MOY_LIVE
                  else T("measuring…", "calcul…")))
     elif not cfg["track_apps"]:
@@ -2100,6 +2111,9 @@ def tick_suivi():
         if app:
             exe, path, pid, plein = app
             s = ouv.get(exe)
+            if s and exe not in stats["apps"]:  # app supprimée des stats pendant sa session
+                ouv.pop(exe, None)
+                s = None
             if s and s.pid != pid:  # le jeu a été relancé : nouvelle session
                 fermer_session(s)
                 s = None

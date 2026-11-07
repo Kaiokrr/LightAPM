@@ -7,7 +7,7 @@
 **Your live APM on top of your games, and your stats for every game, session after session.**
 
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-a855f7?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.6.0-a855f7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.6.1-a855f7?style=flat-square)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-2a2140?style=flat-square)
 ![Free](https://img.shields.io/badge/price-free-2a2140?style=flat-square)
 [![MIT License](https://img.shields.io/badge/license-MIT-2a2140?style=flat-square)](LICENSE)
@@ -50,8 +50,9 @@
 2. Double-click **`lightAPM.exe`**.
 3. Follow the assistant: language, theme, what counts as an action, startup. It takes about a minute.
 
-On first launch, `lightAPM.exe` checks that Python is installed (and offers to install it if it isn't), then
-installs the components it needs. This takes about a minute and only happens once.
+On first launch, `lightAPM.exe` checks that Python is installed. If it isn't, it downloads the official
+installer from python.org, verifies it and installs it for you (with your OK, no administrator rights
+needed). It then installs the components lightAPM needs. This takes a minute or two and only happens once.
 
 > [!NOTE]
 > Windows may show **"Windows protected your PC"** because the exe isn't signed (a certificate costs a lot for

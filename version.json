@@ -1,12 +1,12 @@
 {
-  "version": "1.6.0",
+  "version": "1.6.1",
   "url": "https://raw.githubusercontent.com/Kaiokrr/LightAPM/main/app/lightapm.py",
   "notes": [
-    "lightAPM is now in English, with French available in Options > Appearance",
-    "Language choice in the setup assistant"
+    "lightAPM.exe now downloads and installs Python by itself on PCs that don't have it",
+    "Fixed a crash in the live session banner after deleting a game that was being tracked"
   ],
   "notes_fr": [
-    "lightAPM est maintenant en anglais, avec le français au choix dans Options > Apparence",
-    "Choix de la langue dans l'assistant de configuration"
+    "lightAPM.exe télécharge et installe maintenant Python tout seul sur les PC qui ne l'ont pas",
+    "Correction d'un plantage du bandeau de session après la suppression d'un jeu en cours de suivi"
   ]
 }

@@ -1,7 +1,8 @@
 """
 Lanceur de lightAPM (compilé en lightAPM.exe à la racine du projet).
 
-1. Trouve Python 3.9+ (et propose de l'installer avec winget s'il manque).
+1. Trouve Python 3.9+. S'il manque : télécharge l'installeur officiel de python.org, vérifie son empreinte
+   SHA-256, l'installe sans console ni droits admin (winget en secours), avec l'accord de l'utilisateur.
 2. Installe les dépendances de requirements.txt si elles manquent (une seule fois).
 3. Lance app/lightapm.py sans console, en lui passant les arguments reçus (ex. --autostart).
 
@@ -13,7 +14,9 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
+import urllib.request
 
 NOM = "lightAPM"
 if getattr(sys, "frozen", False):  # lightAPM.exe : posé à la racine du projet
@@ -26,6 +29,11 @@ DATA = os.path.join(RACINE, "data")
 MARQUEUR = os.path.join(DATA, "deps.ok")
 MODULES = "import customtkinter, pynput, pystray, PIL"
 SANS_CONSOLE = 0x08000000  # CREATE_NO_WINDOW
+# Python installé si l'utilisateur n'en a pas : installeurs officiels python.org (signés par la
+# Python Software Foundation), vérifiés par leur empreinte SHA-256 avant d'être lancés.
+PY_VERSION = "3.13.17"
+PY_SHA256 = {"amd64": "5da012101ba2e17113a9a1cd901e9ce1441086f2b7ecb5de06ec94163899a190",
+             "arm64": "3089a1977c32b26f5078e5a7d0285b7a861b8c96250c5dac3b6af59fbe9e9a75"}
 
 
 def _langue():
@@ -93,22 +101,78 @@ def trouver_python():
     return None
 
 
+def architecture():
+    a = (os.environ.get("PROCESSOR_ARCHITEW6432") or os.environ.get("PROCESSOR_ARCHITECTURE") or "").upper()
+    return "arm64" if "ARM" in a else "amd64"
+
+
+def telecharger(url, dest, progres):
+    """Télécharge `url` dans `dest` en signalant l'avancement (0 à 1). Renvoie l'empreinte SHA-256."""
+    h = hashlib.sha256()
+    req = urllib.request.Request(url, headers={"User-Agent": f"{NOM}-launcher"})
+    with urllib.request.urlopen(req, timeout=60) as r, open(dest, "wb") as f:
+        total, lu = int(r.headers.get("Content-Length") or 0), 0
+        while True:
+            bloc = r.read(256 * 1024)
+            if not bloc:
+                break
+            f.write(bloc)
+            h.update(bloc)
+            lu += len(bloc)
+            if total:
+                progres(lu / total)
+    return h.hexdigest()
+
+
 def installer_python():
-    if message(T("Python isn't installed on this PC, and lightAPM needs it.\n\n"
-                 "Install it now (Python 3.12, no administrator rights needed)?",
-                 "Python n'est pas installé sur ce PC, et lightAPM en a besoin.\n\n"
-                 "L'installer maintenant (Python 3.12, sans droits administrateur) ?"), style=0x24) != 6:
+    """Installe Python pour l'utilisateur courant, sans droits admin. Renvoie le chemin de python.exe."""
+    if message(T("lightAPM needs Python, which isn't installed on this PC.\n\n"
+                 f"Download and install it automatically now?\n(Python {PY_VERSION} from python.org, about "
+                 "30 MB, no administrator rights needed)",
+                 "lightAPM a besoin de Python, qui n'est pas installé sur ce PC.\n\n"
+                 f"Le télécharger et l'installer automatiquement maintenant ?\n(Python {PY_VERSION} depuis "
+                 "python.org, environ 30 Mo, sans droits administrateur)"), style=0x24) != 6:
         return None
-    if not shutil.which("winget"):
-        message(T("Install Python from https://www.python.org/downloads/ "
-                  "(tick \"Add python.exe to PATH\"), then run lightAPM.exe again.",
-                  "Installe Python depuis https://www.python.org/downloads/ "
-                  "(coche « Add python.exe to PATH »), puis relance lightAPM.exe."))
-        return None
-    ok = Progression(T("Installing Python 3.12…", "Installation de Python 3.12…")).lancer(
-        ["winget", "install", "-e", "--id", "Python.Python.3.12", "--scope", "user",
-         "--accept-package-agreements", "--accept-source-agreements", "--silent"])
-    return trouver_python() if ok else None
+    arch = architecture()
+    url = f"https://www.python.org/ftp/python/{PY_VERSION}/python-{PY_VERSION}-{arch}.exe"
+    dest = os.path.join(tempfile.gettempdir(), f"lightapm-python-{PY_VERSION}-{arch}.exe")
+
+    def job(etat):
+        etat(T("Downloading Python…", "Téléchargement de Python…"), 0.0)
+        empreinte = telecharger(url, dest, lambda x: etat(None, x))
+        if empreinte != PY_SHA256[arch]:
+            raise RuntimeError(T("the downloaded file doesn't match (SHA-256)",
+                                 "le fichier téléchargé ne correspond pas (SHA-256)"))
+        etat(T("Installing Python…\nThis can take a minute.", "Installation de Python…\nÇa peut prendre une minute."),
+             None)
+        r = executer([dest, "/quiet", "InstallAllUsers=0", "PrependPath=1", "Include_launcher=0",
+                      "Include_test=0", "Include_doc=0", "Shortcuts=0", "AssociateFiles=0"], timeout=1200)
+        if r.returncode != 0:
+            raise RuntimeError(T(f"the Python installer stopped (code {r.returncode})",
+                                 f"l'installeur de Python s'est arrêté (code {r.returncode})"))
+
+    prog = Progression(T("Preparing the Python installation…", "Préparation de l'installation de Python…"))
+    ok = prog.lancer_tache(job)
+    try:
+        os.remove(dest)
+    except OSError:
+        pass
+    python = trouver_python() if ok else None
+    if not python and shutil.which("winget"):  # secours : winget
+        Progression(T("Installing Python with winget…", "Installation de Python avec winget…")).lancer(
+            ["winget", "install", "-e", "--id", "Python.Python.3.13", "--scope", "user",
+             "--accept-package-agreements", "--accept-source-agreements", "--silent"])
+        python = trouver_python()
+    if not python:
+        message(T("Python couldn't be installed automatically"
+                  + (f" ({prog.sortie})" if prog.sortie else "") + ".\n\n"
+                  "Install it from https://www.python.org/downloads/ (tick \"Add python.exe to PATH\"), "
+                  "then run lightAPM.exe again.",
+                  "Python n'a pas pu être installé automatiquement"
+                  + (f" ({prog.sortie})" if prog.sortie else "") + ".\n\n"
+                  "Installe-le depuis https://www.python.org/downloads/ (coche « Add python.exe to PATH »), "
+                  "puis relance lightAPM.exe."), style=0x10)
+    return python
 
 
 def signature(python):
@@ -139,12 +203,24 @@ def installer_deps(python):
 
 
 class Progression:
-    """Petite fenêtre « installation en cours » pendant une commande longue."""
+    """Petite fenêtre « installation en cours » pendant une opération longue."""
 
     def __init__(self, texte):
         self.texte, self.ok, self.sortie = texte, False, ""
 
     def lancer(self, cmd):
+        """Exécute une commande (succès = code de retour 0)."""
+        def job(etat):
+            r = executer(cmd, timeout=1800)
+            self.sortie = (r.stdout + r.stderr)[-1500:]
+            if r.returncode != 0:
+                raise RuntimeError(f"code {r.returncode}")
+        ok = self.lancer_tache(job)
+        return ok
+
+    def lancer_tache(self, tache):
+        """Exécute tache(etat) en arrière-plan ; etat(texte ou None, avancement 0-1 ou None = indéterminé).
+        Succès si la tâche ne lève pas d'exception (son message est gardé dans self.sortie)."""
         import tkinter as tk
         from tkinter import ttk
         w = tk.Tk()
@@ -157,28 +233,55 @@ class Progression:
                 w.iconbitmap(ico)
             except tk.TclError:
                 pass
-        tk.Label(w, text=self.texte, bg="#07060a", fg="#f4f1fa", font=("Segoe UI", 11), justify="left").pack(
-            padx=28, pady=(24, 12), anchor="w")
+        label = tk.Label(w, text=self.texte, bg="#07060a", fg="#f4f1fa", font=("Segoe UI", 11), justify="left",
+                         width=38, anchor="w")
+        label.pack(padx=28, pady=(24, 12), anchor="w")
         st = ttk.Style(w)
         st.theme_use("clam")
         st.configure("L.Horizontal.TProgressbar", troughcolor="#1a1524", background="#a855f7",
                      bordercolor="#07060a", lightcolor="#a855f7", darkcolor="#a855f7")
-        barre = ttk.Progressbar(w, mode="indeterminate", length=340, style="L.Horizontal.TProgressbar")
+        barre = ttk.Progressbar(w, mode="indeterminate", length=340, style="L.Horizontal.TProgressbar",
+                                maximum=100)
         barre.pack(padx=28, pady=(0, 26))
         barre.start(12)
         w.update_idletasks()
         w.geometry(f"+{(w.winfo_screenwidth() - w.winfo_reqwidth()) // 2}"
                    f"+{(w.winfo_screenheight() - w.winfo_reqheight()) // 3}")
+        etat_ui = {"texte": None, "avance": None, "fini": False, "mode": "indeterminate"}
+
+        def etat(texte, avance):  # appelé depuis la tâche : l'interface est mise à jour par rafraichir()
+            if texte is not None:
+                etat_ui["texte"] = texte
+            etat_ui["avance"] = avance
+
+        def rafraichir():
+            if etat_ui["texte"] is not None:
+                label.configure(text=etat_ui["texte"])
+                etat_ui["texte"] = None
+            mode = "determinate" if etat_ui["avance"] is not None else "indeterminate"
+            if mode != etat_ui["mode"]:
+                etat_ui["mode"] = mode
+                barre.stop()
+                barre.configure(mode=mode)
+                if mode == "indeterminate":
+                    barre.start(12)
+            if mode == "determinate":
+                barre["value"] = etat_ui["avance"] * 100
+            if etat_ui["fini"]:
+                w.destroy()
+                return
+            w.after(100, rafraichir)
 
         def job():
             try:
-                r = executer(cmd, timeout=1800)
-                self.ok, self.sortie = r.returncode == 0, (r.stdout + r.stderr)[-1500:]
+                tache(etat)
+                self.ok = True
             except Exception as e:
-                self.sortie = str(e)
-            w.after(0, w.destroy)
+                self.sortie = self.sortie or str(e)
+            etat_ui["fini"] = True
 
         threading.Thread(target=job, daemon=True).start()
+        w.after(100, rafraichir)
         w.mainloop()
         return self.ok
 
@@ -189,7 +292,8 @@ def main():
                   f"Fichier introuvable :\n{APP}\n\nGarde lightAPM.exe à la racine du dossier lightAPM."),
                 style=0x10)
         return
-    python = trouver_python() or installer_python()
+    force = os.environ.get("LIGHTAPM_TEST_INSTALL_PYTHON") == "1"  # test : simule un PC sans Python
+    python = (None if force else trouver_python()) or installer_python()
     if not python:
         return
     os.makedirs(DATA, exist_ok=True)
