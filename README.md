@@ -10,6 +10,7 @@
 ![Version](https://img.shields.io/badge/version-1.5.0-a855f7?style=flat-square)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-2a2140?style=flat-square)
 ![Gratuit](https://img.shields.io/badge/prix-gratuit-2a2140?style=flat-square)
+[![Licence MIT](https://img.shields.io/badge/licence-MIT-2a2140?style=flat-square)](LICENSE)
 
 ### [Télécharger lightAPM](https://github.com/Kaiokrr/lightAPM/archive/refs/heads/main.zip)
 
@@ -156,5 +157,5 @@ Au démarrage suivant, les utilisateurs se voient proposer la mise à jour. L'ap
 <br>
 
 <div align="center">
-<sub>Fait par <a href="https://github.com/Kaiokrr">Kaiokrr</a></sub>
+<sub>Fait par <a href="https://github.com/Kaiokrr">Kaiokrr</a> · Code sous <a href="LICENSE">licence MIT</a> : libre de l'utiliser, le modifier et le partager</sub>
 </div>
